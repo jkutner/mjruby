@@ -10,6 +10,10 @@ def debug(msg)
   puts msg if ENV['MJRUBY_DEBUG']
 end
 
+def warn(msg)
+  puts "WARNING: #{msg}"
+end
+
 def resolve_java_command
   if ENV['JAVACMD']
     ENV['JAVACMD']
@@ -21,7 +25,12 @@ def resolve_java_command
       "#{ENV['JAVA_HOME']}/bin/java"
     end
   else
-    # TODO parse path
+    path_items = ENV['PATH'].split(File::PATH_SEPARATOR)
+    path_items.each do |path_item|
+      Dir.foreach(path_item) do |filename|
+        return "#{path_item}/java" if filename == "java"
+      end if Dir.exist?(path_item)
+    end
     raise "No `java' executable found on PATH."
   end
 end
@@ -31,16 +40,34 @@ def resolve_jruby_home
 end
 
 def resolve_jruby_classpath(jruby_home)
-  # make better
   cp_ary = []
-  Dir.foreach("#{jruby_home}/lib") do |filename|
-    # make sure only one jruby on cp
-    if filename.end_with?(".jar")
-      cp_ary << "#{jruby_home}/lib/#{filename}"
+  jruby_already_added = false
+  ["jruby.jar", "jruby-complete.jar"].each do |jruby_jar|
+    full_path_to_jar = "#{jruby_home}/lib/#{jruby_jar}"
+    if File.exist?(full_path_to_jar)
+      warn("more than one JRuby JAR found in lib directory") if jruby_already_added
+      cp_ary << full_path_to_jar
+      jruby_already_added = true
     end
   end
-
+  cp_ary << "#{jruby_home}/lib/jruby-truffle.jar"
   cp_ary.join(cp_delim)
+end
+
+def resolve_classpath(jruby_home)
+  if ENV['JRUBY_PARENT_CLASSPATH']
+    ENV['JRUBY_PARENT_CLASSPATH']
+  else
+    cp_ary = []
+    Dir.foreach("#{jruby_home}/lib") do |filename|
+      if filename.end_with?(".jar")
+        unless ["jruby.jar", "jruby-complete.jar"].include?(filename)
+          cp_ary << "#{jruby_home}/lib/#{filename}"
+        end
+      end
+    end
+    cp_ary.join(cp_delim)
+  end
 end
 
 def __main__(argv)
@@ -49,11 +76,12 @@ def __main__(argv)
   jruby_home = resolve_jruby_home
   jruby_shell = "/bin/sh"
   jruby_cp = resolve_jruby_classpath(jruby_home)
+  classpath = resolve_classpath(jruby_home)
 
   argv.shift
   java_args = [
     "-Xbootclasspath/a:#{jruby_cp}",
-    "-classpath", jruby_cp,
+    "-classpath", "#{jruby_cp}#{cp_delim}#{classpath}",
     "-Djruby.home=#{jruby_home}",
     "-Djruby.lib=#{jruby_home}/lib",
     "-Djruby.script=jruby",
