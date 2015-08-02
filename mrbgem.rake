@@ -8,4 +8,5 @@ MRuby::Gem::Specification.new('mjruby') do |spec|
   spec.add_dependency 'mruby-mtest', :mgem => 'mruby-mtest'
   spec.add_dependency 'mruby-bin-mirb', :core => 'mruby-bin-mirb'
   spec.add_dependency 'mruby-process', :github => 'jkutner/mruby-process'
+  spec.add_dependency 'mruby-env', :mgem => 'mruby-env'
 end
