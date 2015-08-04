@@ -6,7 +6,6 @@ class JRubyOptsParser
     p
   end
 
-  attr_reader :java_opts
   attr_reader :ruby_opts
   attr_reader :jruby_opts
   attr_reader :java_cmd
@@ -26,11 +25,17 @@ class JRubyOptsParser
   end
 
   def java_mem
-    ENV['JAVA_MEM'] || @java_mem
+    @java_mem || '-Xmx500m'
   end
 
-  def java_mem_min
-    ENV['JAVA_MEM_MIN'] || @java_mem_min
+  attr_reader :java_mem_min
+
+  def java_stack
+    @java_stack || '-Xss2048k'
+  end
+
+  def java_opts
+    [java_mem, java_mem_min, java_stack].compact + @java_opts
   end
 
   private

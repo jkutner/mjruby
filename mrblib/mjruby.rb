@@ -70,9 +70,8 @@ def resolve_java_command
   end
 end
 
-def java_opts
-  (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) +
-    [ENV['JAVA_MEM'],ENV['JAVA_MEM_MIN'],ENV['JAVA_MEM_MIN']].compact
+def java_opts(add_java_opts)
+  (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
 end
 
 def jffi_opts(jruby_home)
@@ -89,7 +88,7 @@ def __main__(argv)
   classpath = resolve_classpath(jruby_home)
   jruby_opts = cli_opts.jruby_opts
 
-  all_args = java_opts + jffi_opts(jruby_home) + [
+  all_args = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
     "-Xbootclasspath/a:#{jruby_cp}",
     "-classpath", "#{jruby_cp}#{cp_delim}#{classpath}",
     "-Djruby.home=#{jruby_home}",
