@@ -1,11 +1,3 @@
-def is_cygwin
-  false
-end
-
-def cp_delim
-  ":"
-end
-
 def debug(msg)
   puts msg if ENV['MJRUBY_DEBUG']
 end
@@ -31,7 +23,7 @@ def resolve_jruby_classpath(jruby_home)
     end
   end
   cp_ary << "#{jruby_home}/lib/jruby-truffle.jar"
-  cp_ary.join(cp_delim)
+  cp_ary.join(JavaSupport.cp_delim)
 end
 
 def resolve_classpath(jruby_home)
@@ -46,7 +38,7 @@ def resolve_classpath(jruby_home)
         end
       end
     end
-    cp_ary.join(cp_delim)
+    cp_ary.join(JavaSupport.cp_delim)
   end
 end
 
@@ -66,12 +58,17 @@ def __main__(argv)
   jruby_home = resolve_jruby_home
   jruby_shell = "/bin/sh"
   jruby_cp = resolve_jruby_classpath(jruby_home)
-  classpath = resolve_classpath(jruby_home)
+  classpath = jruby_cp + JavaSupport.cp_delim
+  classpath += cli_opts.classpath.join(JavaSupport.cp_delim) + JavaSupport.cp_delim
+  classpath += resolve_classpath(jruby_home)
   jruby_opts = cli_opts.jruby_opts
+
+  # Not really sure if this is needed
+  ENV['JAVA_VM'] = cli_opts.java_vm
 
   all_args = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
     "-Xbootclasspath/a:#{jruby_cp}",
-    "-classpath", "#{jruby_cp}#{cp_delim}#{classpath}",
+    "-classpath", classpath,
     "-Djruby.home=#{jruby_home}",
     "-Djruby.lib=#{jruby_home}/lib",
     "-Djruby.script=jruby",

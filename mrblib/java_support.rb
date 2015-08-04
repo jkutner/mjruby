@@ -39,4 +39,13 @@ class JavaSupport
     # TODO use libjvm
     Kernel.system java_cmd, *args
   end
+
+  def self.is_cygwin
+    false
+  end
+
+  def self.cp_delim
+    # TODO Windows?
+    is_cygwin ? ";" : ":"
+  end
 end
