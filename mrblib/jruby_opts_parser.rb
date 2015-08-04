@@ -2,7 +2,7 @@ class JRubyOptsParser
 
   def self.parse!(opts)
     p = new(opts)
-    raise "Invalid CLI Options" unless p.valid?
+    raise ArgumentError.new("Invalid CLI Options") unless p.valid?
     p
   end
 
@@ -89,7 +89,7 @@ class JRubyOptsParser
       when "--headless"
         @java_opts << "-Djava.awt.headless=true"
       end
-      @valid = true
     end
+    @valid = true
   end
 end
