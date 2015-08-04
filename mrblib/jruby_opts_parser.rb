@@ -74,15 +74,25 @@ class JRubyOptsParser
           end
           @java_opts << java_opt
         end
-      when /(^-X.*\..*\..*\..*)|(-X.*\?)/
-        # wtf
-      when /^-X/
+      when /^((-X.*\.\.\.)|(-X.*\?))/
+        # Pass -X... and -X? search options through
         @ruby_opts << opt
-      when /^((-C)|(-e)|(-I)|(-S))/
+      when /^-X/
+        val = opt[2..-1]
+        if val.include?('.')
+          # Match -Xa.b.c=d to translate to -Da.b.c=d as a java option
+          @java_opts << "-Djruby.#{val}"
+        else
+          # QUESTION is this correct? doesn't seem accepted
+          @ruby_opts << "-X#{val}"
+        end
+      when /^((-C)|(-e)|(-I)|(-S))$/
+        # Match switches that take an argument
         @ruby_opts << opt
         @ruby_opts << opts.shift
-      when /^((-e)|(-I)|(-S)).*/
-        @ruby_args << opt
+      when /^((-C)|(-e)|(-I)|(-S)).*/
+        # Match same switches with argument stuck together
+        @ruby_opts << opt
       when "--manage"
         @java_opts << "-Dcom.sun.management.jmxremote"
         @java_opts << "-Djruby.management.enabled=true"
@@ -107,15 +117,22 @@ class JRubyOptsParser
       when "--"
         # Abort processing on the double dash
         opts.clear
-      when "-.*"
+      when /^-.*/
         # send the rest of the options to Ruby
         @ruby_opts += opts
         opts.clear
-      when ".*"
+      else
         # Abort processing on first non-opt arg
         opts.clear
       end
     end
     @valid = true
   end
+
+  # # captures the arguments to an option
+  # def parse_opt_args(pattern, opt)
+  #   arg = opt.sub(pattern, '')
+  #   arg = yield if arg.empty?
+  #   arg
+  # end
 end
