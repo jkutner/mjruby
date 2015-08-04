@@ -20,4 +20,8 @@ class JavaSupport
     end
   end
 
+  def self.exec(java_cmd, *args)
+    # TODO use libjvm
+    Kernel.exec java_cmd, *args
+  end
 end

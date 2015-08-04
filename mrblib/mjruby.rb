@@ -77,5 +77,5 @@ def __main__(argv)
     java_class
   ] + cli_opts.ruby_opts
   debug "#{javacmd} #{all_args.join(' ')}"
-  exec javacmd, *all_args
+  JavaSupport.exec javacmd, *all_args
 end
