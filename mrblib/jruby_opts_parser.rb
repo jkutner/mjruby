@@ -84,10 +84,33 @@ class JRubyOptsParser
       when /^((-e)|(-I)|(-S)).*/
         @ruby_args << opt
       when "--manage"
-         @java_opts << "-Dcom.sun.management.jmxremote"
-         @java_opts << "-Djruby.management.enabled=true"
+        @java_opts << "-Dcom.sun.management.jmxremote"
+        @java_opts << "-Djruby.management.enabled=true"
       when "--headless"
         @java_opts << "-Djava.awt.headless=true"
+      when "--dev"
+        @java_opts << "-XX:+TieredCompilation"
+        @java_opts << "-XX:TieredStopAtLevel=1"
+        @java_opts << "-Djruby.compile.mode=OFF"
+        @java_opts << "-Djruby.compile.invokedynamic=false"
+      when "--sample"
+        @java_opts << "-Xprof"
+      when "--1.8"
+       puts "warning: --1.8 ignored"
+      when "--1.9"
+        puts "warning: --1.9 ignored"
+      when "--2.0"
+        puts "warning: --2.0 ignored"
+      when "--"
+        # Abort processing on the double dash
+        opts.clear
+      when "-.*"
+        # send the rest of the options to Ruby
+        @ruby_opts += opts
+        opts.clear
+      when ".*"
+        # Abort processing on first non-opt arg
+        opts.clear
       end
     end
     @valid = true
