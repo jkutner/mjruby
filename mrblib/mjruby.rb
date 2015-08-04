@@ -15,6 +15,7 @@ def warn(msg)
 end
 
 def resolve_jruby_home
+  # TODO consider symlinks?
   ENV['JRUBY_HOME'] || File.expand_path("..", Dir.pwd)
 end
 

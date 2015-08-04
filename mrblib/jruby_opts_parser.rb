@@ -11,6 +11,7 @@ class JRubyOptsParser
   attr_reader :java_cmd
   attr_reader :classpath
   attr_reader :java_encoding
+  attr_reader :java_vm
 
   def initialize(opts)
     @raw_opts = opts
@@ -35,7 +36,7 @@ class JRubyOptsParser
   end
 
   def java_opts
-    [java_mem, java_mem_min, java_stack].compact + @java_opts
+    [java_mem, java_mem_min, java_stack, java_vm].compact + @java_opts
   end
 
   private
@@ -102,7 +103,14 @@ class JRubyOptsParser
       # when "--jdb"
       #   @java_cmd = JavaSupport.resolve_java_command("jdb")
       #   @java_opts += ["-sourcepath", "$JRUBY_HOME/lib/ruby/1.9:."]
+      when "--client"
+        @java_vm = "-client"
+      when "--server"
+        @java_vm = "-server"
+      when "--no-client"
+        @java_vm = nil
       when "--dev"
+        @java_vm = "-client"
         @java_opts << "-XX:+TieredCompilation"
         @java_opts << "-XX:TieredStopAtLevel=1"
         @java_opts << "-Djruby.compile.mode=OFF"
