@@ -2,12 +2,12 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
 
   def test_parse_java_opts
     parser = JRubyOptsParser.parse!(["-J-Xmx1g"])
-    assert_true parser.java_opts.include?("-Xmx1g"), "-Xmx1g"
+    assert_includes parser.java_opts, "-Xmx1g"
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(["-J-Xms1g"])
-    assert_true parser.java_opts.include?('-Xms1g'), '-Xms1g'
-    assert_true parser.java_opts.include?('-Xmx500m')
+    assert_includes parser.java_opts, '-Xms1g'
+    assert_includes parser.java_opts, '-Xmx500m'
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(['-J-Djruby.thread.pooling=true'])
@@ -15,35 +15,62 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(["--manage"])
-    assert_true parser.java_opts.include?("-Dcom.sun.management.jmxremote")
-    assert_true parser.java_opts.include?("-Djruby.management.enabled=true")
+    assert_includes parser.java_opts, "-Dcom.sun.management.jmxremote"
+    assert_includes parser.java_opts, "-Djruby.management.enabled=true"
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(["--headless"])
-    assert_true parser.java_opts.include?("-Djava.awt.headless=true")
+    assert_includes parser.java_opts, "-Djava.awt.headless=true"
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(["--sample"])
-    assert_true parser.java_opts.include?("-Xprof")
+    assert_includes parser.java_opts, "-Xprof"
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(["--dev"])
-    assert_true parser.java_opts.include?("-XX:+TieredCompilation")
-    assert_true parser.java_opts.include?("-XX:TieredStopAtLevel=1")
-    assert_true parser.java_opts.include?("-Djruby.compile.mode=OFF")
-    assert_true parser.java_opts.include?("-Djruby.compile.invokedynamic=false")
+    assert_includes parser.java_opts, "-XX:+TieredCompilation"
+    assert_includes parser.java_opts, "-XX:TieredStopAtLevel=1"
+    assert_includes parser.java_opts, "-Djruby.compile.mode=OFF"
+    assert_includes parser.java_opts, "-Djruby.compile.invokedynamic=false"
     assert parser.valid?
   end
 
   def test_parse_ruby_opts
+
+  end
+
+  def test_parse_ruby_opts_with_args
     parser = JRubyOptsParser.parse!(["-Ctmp"])
     assert_equal ["-Ctmp"], parser.ruby_opts
     assert parser.valid?
+    parser = JRubyOptsParser.parse!(["-C", "tmp"])
+    assert_equal ["-C", "tmp"], parser.ruby_opts
+    assert parser.valid?
 
-    # QUESTION not sure if this is legit
-    # parser = JRubyOptsParser.parse!(["-Xruby_opt=true"])
-    # assert_equal parser.ruby_opts, ["-Xruby_opt=true"]
-    # assert parser.valid?
+    parser = JRubyOptsParser.parse!(['-e"puts 1"'])
+    assert_equal ['-e"puts 1"'], parser.ruby_opts
+    assert parser.valid?
+    parser = JRubyOptsParser.parse!(['-e', '"puts 1"'])
+    assert_equal ['-e', '"puts 1"'], parser.ruby_opts
+    assert parser.valid?
+
+    parser = JRubyOptsParser.parse!(['-Ilib'])
+    assert_equal ['-Ilib'], parser.ruby_opts
+    assert parser.valid?
+    parser = JRubyOptsParser.parse!(['-I', 'lib'])
+    assert_equal ['-I', 'lib'], parser.ruby_opts
+    assert parser.valid?
+
+    parser = JRubyOptsParser.parse!(['-Srake'])
+    assert_equal ['-Srake'], parser.ruby_opts
+    assert parser.valid?
+    parser = JRubyOptsParser.parse!(['-S', 'rake'])
+    assert_equal ['-S', 'rake'], parser.ruby_opts
+    assert parser.valid?
+  end
+
+  def test_ea
+    # ???
   end
 
   def test_parse_x_opts
@@ -78,6 +105,13 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
   def test_dash_star
     parser = JRubyOptsParser.parse!(["-*", "-Xcompile.invokedynamic=true"])
     assert_equal parser.ruby_opts, ["-Xcompile.invokedynamic=true"]
+    assert parser.valid?
+  end
+
+  def test_file_encoding
+    parser = JRubyOptsParser.parse!(["-J-Dfile.encoding=UTF-8"])
+    assert_includes parser.java_opts, "-Dfile.encoding=UTF-8"
+    assert_equal parser.java_encoding, "-Dfile.encoding=UTF-8"
     assert parser.valid?
   end
 

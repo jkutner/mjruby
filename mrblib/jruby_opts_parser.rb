@@ -65,13 +65,14 @@ class JRubyOptsParser
           return
         when /(-classpath)|(-cp)/
           @classpath << opts.shift
+        when /^-ea/
+          # QUESTION does this even do anything?
+          verify_java = true
+          @java_opts << java_opt
+        when /^-Dfile.encoding=/
+          @java_encoding = java_opt
+          @java_opts << java_opt
         else
-          case java_opt
-          when /^-ea/
-            verify_java = true
-          when /^-Dfile.encoding=/
-            java_encoding = java_opt
-          end
           @java_opts << java_opt
         end
       when /^((-X.*\.\.\.)|(-X.*\?))/
