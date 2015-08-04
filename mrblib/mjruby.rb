@@ -50,9 +50,14 @@ def jffi_opts(jruby_home)
   ["-Djffi.boot.library.path=#{jruby_home}/lib/jni"]
 end
 
+def jruby_opts_env
+  # regex support is limited, so...
+  ENV['JRUBY_OPTS'].split(' ').select{|opt| !opt.empty?}.compact
+end
+
 def __main__(argv)
   command = argv.shift
-  cli_opts = JRubyOptsParser.parse!(argv)
+  cli_opts = JRubyOptsParser.parse!(jruby_opts_env + argv)
   java_class = "org.jruby.Main"
   javacmd = cli_opts.java_cmd || JavaSupport.resolve_java_command
   jruby_home = resolve_jruby_home
