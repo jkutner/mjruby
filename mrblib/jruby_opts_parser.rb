@@ -86,8 +86,7 @@ class JRubyOptsParser
           # Match -Xa.b.c=d to translate to -Da.b.c=d as a java option
           @java_opts << "-Djruby.#{val}"
         else
-          # QUESTION is this correct? doesn't seem accepted
-          @ruby_opts << "-X#{val}"
+          @ruby_opts << opt
         end
       when /^((-C)|(-e)|(-I)|(-S))$/
         # Match switches that take an argument
