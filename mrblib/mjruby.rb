@@ -49,27 +49,6 @@ def resolve_classpath(jruby_home)
   end
 end
 
-def resolve_java_command
-  if ENV['JAVACMD']
-    ENV['JAVACMD']
-  elsif ENV['JAVA_HOME']
-    if is_cygwin
-      raise "No cygwin support yet :("
-      # "`cygpath -u "$JAVA_HOME"`/bin/java"
-    else
-      "#{ENV['JAVA_HOME']}/bin/java"
-    end
-  else
-    path_items = ENV['PATH'].split(File::PATH_SEPARATOR)
-    path_items.each do |path_item|
-      Dir.foreach(path_item) do |filename|
-        return "#{path_item}/java" if filename == "java"
-      end if Dir.exist?(path_item)
-    end
-    raise "No `java' executable found on PATH."
-  end
-end
-
 def java_opts(add_java_opts)
   (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
 end
@@ -81,7 +60,7 @@ end
 def __main__(argv)
   cli_opts = JRubyOptsParser.parse!(argv)
   java_class = "org.jruby.Main"
-  javacmd = cli_opts.java_cmd || resolve_java_command
+  javacmd = cli_opts.java_cmd || JavaSupport.resolve_java_command
   jruby_home = resolve_jruby_home
   jruby_shell = "/bin/sh"
   jruby_cp = resolve_jruby_classpath(jruby_home)

@@ -88,6 +88,9 @@ class JRubyOptsParser
         @java_opts << "-Djruby.management.enabled=true"
       when "--headless"
         @java_opts << "-Djava.awt.headless=true"
+      # when "--jdb"
+      #   @java_cmd = JavaSupport.resolve_java_command("jdb")
+      #   @java_opts += ["-sourcepath", "$JRUBY_HOME/lib/ruby/1.9:."]
       when "--dev"
         @java_opts << "-XX:+TieredCompilation"
         @java_opts << "-XX:TieredStopAtLevel=1"

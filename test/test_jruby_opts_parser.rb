@@ -1,4 +1,4 @@
-class TestMjruby < MTest::Unit::TestCase
+class TestJrubyOptsParser < MTest::Unit::TestCase
 
   def test_parse_java_opts
     parser = JRubyOptsParser.parse!(["-J-Xmx1g"])
