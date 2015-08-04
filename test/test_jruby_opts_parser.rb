@@ -84,6 +84,16 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
     assert parser.valid?
   end
 
+  def test_verify_jruby
+    parser = JRubyOptsParser.parse!(["-J-ea..."])
+    assert_includes parser.java_opts, "-ea..."
+    assert_equal [], parser.ruby_opts
+    assert_true parser.verify_jruby, "verify_jruby should be 'true'"
+    assert parser.valid?
+
+    # TODO
+  end
+
   def test_parse_3_dots_or_?
     # TODO
   end

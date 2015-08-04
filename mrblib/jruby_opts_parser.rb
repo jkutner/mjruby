@@ -12,6 +12,7 @@ class JRubyOptsParser
   attr_reader :classpath
   attr_reader :java_encoding
   attr_reader :java_vm
+  attr_reader :verify_jruby
 
   def initialize(opts)
     @raw_opts = opts
@@ -68,7 +69,7 @@ class JRubyOptsParser
           @classpath << opts.shift
         when /^-ea/
           # QUESTION does this even do anything?
-          verify_java = true
+          @verify_jruby = true
           @java_opts << java_opt
         when /^-Dfile.encoding=/
           @java_encoding = java_opt

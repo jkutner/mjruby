@@ -71,6 +71,10 @@ def __main__(argv)
   # Not really sure if this is needed
   ENV['JAVA_VM'] = cli_opts.java_vm
 
+  # TODO detect darwin
+  # java_encoding = cli_opts
+  # java_encoding =|| "-Dfile.encoding=UTF-8"
+
   all_args = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
     "-Xbootclasspath/a:#{jruby_cp}",
     "-classpath", classpath,
@@ -81,5 +85,10 @@ def __main__(argv)
     java_class
   ] + cli_opts.ruby_opts
   debug "#{javacmd} #{all_args.join(' ')}"
-  JavaSupport.exec javacmd, *all_args
+
+  if cli_opts.verify_jruby
+    # TODO ???
+  else
+    JavaSupport.exec javacmd, *all_args
+  end
 end
