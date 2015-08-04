@@ -54,12 +54,12 @@ class JRubyOptsParser
         when /^-Xss/
           @java_stack = java_opt
         when ''
-          # exec?
+          JavaSupport.system_java "-help"
           puts "(Prepend -J in front of these options when using 'jruby' command)"
           @valid = false
           return
         when '-X'
-          # exec?
+          JavaSupport.system_java "-X"
           puts "(Prepend -J in front of these options when using 'jruby' command)"
           @valid = false
           return
@@ -129,11 +129,4 @@ class JRubyOptsParser
     end
     @valid = true
   end
-
-  # # captures the arguments to an option
-  # def parse_opt_args(pattern, opt)
-  #   arg = opt.sub(pattern, '')
-  #   arg = yield if arg.empty?
-  #   arg
-  # end
 end

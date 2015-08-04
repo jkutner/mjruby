@@ -115,6 +115,22 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
     assert parser.valid?
   end
 
+  def test_classpath
+    parser = JRubyOptsParser.parse!(["-J-cp", "foo/bar.jar"])
+    assert_includes parser.classpath, "foo/bar.jar"
+    assert parser.valid?
+
+    parser = JRubyOptsParser.parse!(["-J-classpath", "foo/bar.jar"])
+    assert_includes parser.classpath, "foo/bar.jar"
+    assert parser.valid?
+
+    # it's a little weird that we don't split the string into it's path parts
+    # but it's not worth it
+    parser = JRubyOptsParser.parse!(["-J-cp", "foo.jar:bar/*"])
+    assert_includes parser.classpath, "foo.jar:bar/*"
+    assert parser.valid?
+  end
+
   def test_parse_errors
     # assert_raise Error do
     #   JRubyOptsParser.parse!(["asdjkashf"])

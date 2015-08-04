@@ -20,8 +20,23 @@ class JavaSupport
     end
   end
 
+  def self.exec_java(*args)
+    # TODO use libjvm
+    Kernel.exec resolve_java_command, *args
+  end
+
   def self.exec(java_cmd, *args)
     # TODO use libjvm
     Kernel.exec java_cmd, *args
+  end
+
+  def self.system_java(*args)
+    # TODO use libjvm
+    Kernel.exec resolve_java_command, *args
+  end
+
+  def self.system(java_cmd, *args)
+    # TODO use libjvm
+    Kernel.system java_cmd, *args
   end
 end

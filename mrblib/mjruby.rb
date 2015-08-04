@@ -58,6 +58,7 @@ def jffi_opts(jruby_home)
 end
 
 def __main__(argv)
+  command = argv.shift
   cli_opts = JRubyOptsParser.parse!(argv)
   java_class = "org.jruby.Main"
   javacmd = cli_opts.java_cmd || JavaSupport.resolve_java_command
