@@ -1,4 +1,4 @@
-class TestMjruby < MTest::Unit::TestCase
+class TestJavaSupport < MTest::Unit::TestCase
 
   def test_resolve_java_command_from_java_home
     ENV['JAVACMD'] = nil
