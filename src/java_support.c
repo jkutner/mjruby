@@ -19,6 +19,15 @@
 
 typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args);
 
+static char*
+str_with_dir(char *java_home, char *path)
+{
+  char *full_path = malloc(strlen(java_home)+strlen(path));
+  strcpy(full_path, java_home);
+  strcat(full_path, path);
+  return full_path;
+}
+
 static mrb_value
 mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 {
@@ -51,7 +60,6 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
     }
   }
 
-  // JavaVMOption jvmOptions[0];
   jvmArgs.options = jvmOptions;
   jvmArgs.nOptions = 0;
   jvmArgs.version = JNI_VERSION_1_4;
@@ -60,8 +68,8 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   CreateJavaVM_t* createJavaVM = NULL;
 
   // jli needs to be loaded on OSX because otherwise the OS tries to run the system Java
-  void *libjli = dlopen("/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/jli/libjli.dylib", RTLD_NOW + RTLD_GLOBAL);
-  void *libjvm = dlopen("/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/server/libjvm.dylib", RTLD_NOW + RTLD_GLOBAL);
+  void *libjli = dlopen(str_with_dir(java_home, "/jre/lib/jli/libjli.dylib"), RTLD_NOW + RTLD_GLOBAL);
+  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.dylib"), RTLD_NOW + RTLD_GLOBAL);
 
   createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
   if (createJavaVM == NULL) {
