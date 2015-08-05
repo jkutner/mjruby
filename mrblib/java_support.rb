@@ -1,11 +1,15 @@
 class JavaSupport
 
-  def self.java_home
-    # if cmd == "java" && ENV['JAVACMD']
-    #   java_bin = File.dirname(ENV['JAVACMD'])
-    #   File.dirname(java_bin)
-    if ENV['JAVA_HOME']
-      if is_cygwin
+  def initialize
+    @java_home = resolve_java_home
+  end
+
+  def resolve_java_home
+    if ENV['JAVACMD']
+      java_bin = File.dirname(ENV['JAVACMD'])
+      File.dirname(java_bin)
+    elsif ENV['JAVA_HOME']
+      if JavaSupport.is_cygwin
         raise "No cygwin support yet :("
         # "`cygpath -u "$JAVA_HOME"`/bin/java"
       else
@@ -22,32 +26,8 @@ class JavaSupport
     end
   end
 
-  def self.resolve_java_command(cmd="java")
-    if cmd == "java" && ENV['JAVACMD']
-      ENV['JAVACMD']
-    else
-      "#{java_home}/#{cmd}"
-    end
-  end
-
-  def self.exec_java(*args)
-    # TODO use libjvm
-    Kernel.exec resolve_java_command, *args
-  end
-
-  def self.exec(java_cmd, *args)
-    # TODO use libjvm
-    Kernel.exec java_cmd, *args
-  end
-
-  def self.system_java(*args)
-    # TODO use libjvm
-    Kernel.exec resolve_java_command, *args
-  end
-
-  def self.system(java_cmd, *args)
-    # TODO use libjvm
-    Kernel.system java_cmd, *args
+  def exec_java(*args)
+    Kernel.exec_java @java_home, *args
   end
 
   def self.is_cygwin

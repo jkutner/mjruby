@@ -63,7 +63,6 @@ def __main__(argv)
   command = argv.shift
   cli_opts = JRubyOptsParser.parse!(jruby_opts_env + argv)
   java_class = "org.jruby.Main"
-  javacmd = cli_opts.java_cmd || JavaSupport.resolve_java_command
   jruby_home = resolve_jruby_home
   jruby_shell = "/bin/sh"
   jruby_cp = resolve_jruby_classpath(jruby_home)
@@ -81,19 +80,17 @@ def __main__(argv)
 
   all_args = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
     "-Xbootclasspath/a:#{jruby_cp}",
-    "-classpath", classpath,
+    # "-classpath", classpath,
     "-Djruby.home=#{jruby_home}",
     "-Djruby.lib=#{jruby_home}/lib",
     "-Djruby.script=jruby",
-    "-Djruby.shell=#{jruby_shell}",
-    java_class
-  ] + cli_opts.ruby_opts
-  debug "#{javacmd} #{all_args.join(' ')}"
+    "-Djruby.shell=#{jruby_shell}"
+  ] #+ cli_opts.ruby_opts
+  debug "java #{all_args.join(' ')}"
 
   if cli_opts.verify_jruby
     # TODO ???
   else
-    puts JavaSupport.java_home
-    puts "exec_java: #{exec_java(JavaSupport.java_home, javacmd, *all_args)}"
+    JavaSupport.new.exec_java(*all_args)
   end
 end
