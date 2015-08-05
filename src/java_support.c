@@ -27,7 +27,17 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   mrb_value *argv;
   mrb_value pathv;
   mrb_int argc, i;
-  const char *path;
+  const char *java_home;
+
+  fflush(stdout);
+  fflush(stderr);
+
+  mrb_get_args(mrb, "*", &argv, &argc);
+  if (argc < 2) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "wrong number of arguments");
+  }
+
+  java_home = mrb_string_value_cstr(mrb, &argv[0]);
 
   JavaVM *jvm;
   JNIEnv *env;
@@ -93,8 +103,8 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   // }
 
   // This is necessary on OSX because it tries to run the system Java otherwise.
-  void *libjli = dlopen("/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/jli/libjli.dylib", RTLD_NOW + RTLD_GLOBAL);
-  void *libjvm = dlopen("/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/lib/server/libjvm.dylib", RTLD_NOW + RTLD_GLOBAL);
+  void *libjli = dlopen(strcat(java_home, "/jre/lib/jli/libjli.dylib"), RTLD_NOW + RTLD_GLOBAL);
+  void *libjvm = dlopen(strcat(java_home, "/jre/lib/server/libjvm.dylib"), RTLD_NOW + RTLD_GLOBAL);
 
 
   createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");

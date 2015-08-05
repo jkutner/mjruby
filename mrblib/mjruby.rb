@@ -93,6 +93,7 @@ def __main__(argv)
   if cli_opts.verify_jruby
     # TODO ???
   else
-    puts "exec_java: #{exec_java("#{JavaSupport.java_home}/lib", javacmd, *all_args)}"
+    puts JavaSupport.java_home
+    puts "exec_java: #{exec_java(JavaSupport.java_home, javacmd, *all_args)}"
   end
 end
