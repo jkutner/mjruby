@@ -42,31 +42,33 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "wrong number of arguments");
   }
 
-  const char *java_home = mrb_string_value_cstr(mrb, &argv[0]);
-  const char *java_main_class = mrb_string_value_cstr(mrb, &argv[1]);
-  const int java_opts_count = mrb_fixnum(argv[2]);
-  const int ruby_opts_start = 3 + java_opts_count;
+  // Process the arguments from mruby
+  int fixed_args = 0;
+  const char *java_home = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
+  const char *java_main_class = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
+  const int java_opts_count = mrb_fixnum(argv[fixed_args++]);
+  const int ruby_opts_start = fixed_args + java_opts_count;
   const int ruby_opts_count = argc - ruby_opts_start;
 
   JavaVM *jvm;
   JNIEnv *env;
-  JavaVMInitArgs jvmArgs;
-  JavaVMOption jvmOptions[java_opts_count];
+  JavaVMInitArgs jvm_init_args;
+  JavaVMOption jvm_opts[java_opts_count];
 
   for (int i = 0; i < java_opts_count; i++) {
-    jvmOptions[i].extraInfo = 0;
-    jvmOptions[i].optionString = mrb_string_value_cstr(mrb, &argv[i+3]);
-    if (strcmp("-client", jvmOptions[i].optionString) == 0) {
+    jvm_opts[i].extraInfo = 0;
+    jvm_opts[i].optionString = mrb_string_value_cstr(mrb, &argv[i+fixed_args]);
+    if (strcmp("-client", jvm_opts[i].optionString) == 0) {
       mrb_raise(mrb, E_ARGUMENT_ERROR, "-client is not a valid option");
-    } else if (strcmp("-server", jvmOptions[i].optionString) == 0) {
+    } else if (strcmp("-server", jvm_opts[i].optionString) == 0) {
       mrb_raise(mrb, E_ARGUMENT_ERROR, "-server is not a valid option");
     }
   }
 
-  jvmArgs.options = jvmOptions;
-  jvmArgs.nOptions = java_opts_count;
-  jvmArgs.version = JNI_VERSION_1_4;
-  jvmArgs.ignoreUnrecognized = JNI_FALSE;
+  jvm_init_args.options = jvm_opts;
+  jvm_init_args.nOptions = java_opts_count;
+  jvm_init_args.version = JNI_VERSION_1_4;
+  jvm_init_args.ignoreUnrecognized = JNI_FALSE;
 
   CreateJavaVM_t* createJavaVM = NULL;
 
@@ -79,34 +81,34 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
     mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
   }
 
-  if (createJavaVM(&jvm, (void**)&env, &jvmArgs) < 0) {
+  if (createJavaVM(&jvm, (void**)&env, &jvm_init_args) < 0) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "JVM creation failed");
   }
 
-  jclass mainClass = (*env)->FindClass(env, java_main_class);
-  if (!mainClass) {
+  jclass main_class = (*env)->FindClass(env, java_main_class);
+  if (!main_class) {
     mrb_raise(mrb, E_ARGUMENT_ERROR, java_main_class);
   }
 
-  jmethodID mainMethod = (*env)->GetStaticMethodID(env, mainClass, "main", "([Ljava/lang/String;)V");
-  if (!mainMethod) {
+  jmethodID main_method = (*env)->GetStaticMethodID(env, main_class, "main", "([Ljava/lang/String;)V");
+  if (!main_method) {
     mrb_raise(mrb, E_ARGUMENT_ERROR, "Cannot get main method.");
   }
 
-  jclass jclassString = (*env)->FindClass(env, "java/lang/String");
-  jstring jstringArg = (*env)->NewStringUTF(env, "");
+  jclass j_class_string = (*env)->FindClass(env, "java/lang/String");
+  jstring j_string_arg = (*env)->NewStringUTF(env, "");
 
-  jobjectArray mainArgs = (*env)->NewObjectArray(env, ruby_opts_count, jclassString, jstringArg);
+  jobjectArray main_args = (*env)->NewObjectArray(env, ruby_opts_count, j_class_string, j_string_arg);
 
   for (int i = 0; i < ruby_opts_count; i++) {
-    jstring jstringArg = (*env)->NewStringUTF(env, mrb_string_value_cstr(mrb, &argv[i+ruby_opts_start]));
-    if (!jstringArg) {
+    jstring j_string_arg = (*env)->NewStringUTF(env, mrb_string_value_cstr(mrb, &argv[i+ruby_opts_start]));
+    if (!j_string_arg) {
         mrb_raise(mrb, E_ARGUMENT_ERROR, "NewStringUTF() failed");
     }
-    (*env)->SetObjectArrayElement(env, mainArgs, i, jstringArg);
+    (*env)->SetObjectArrayElement(env, main_args, i, j_string_arg);
   }
 
-  (*env)->CallStaticVoidMethod(env, mainClass, mainMethod, mainArgs);
+  (*env)->CallStaticVoidMethod(env, main_class, main_method, main_args);
 
   if (env && (*env)->ExceptionOccurred(env)) {
     (*env)->ExceptionDescribe(env);
@@ -119,9 +121,6 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 void
 mrb_mjruby_gem_init(mrb_state *mrb)
 {
-  // struct RClass *java_support;
-
-  // java_support   = mrb_class_get(mrb, "JavaSupport");
   mrb_define_method(mrb, mrb->kernel_module, "exec_java",  mrb_java_support_exec, MRB_ARGS_ANY());
 }
 
