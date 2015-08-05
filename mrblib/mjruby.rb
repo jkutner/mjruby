@@ -26,13 +26,13 @@ def resolve_jruby_classpath(jruby_home)
       jruby_already_added = true
     end
   end
-  cp_ary << "#{jruby_home}/lib/jruby-truffle.jar"
-  cp_ary.join(JavaSupport.cp_delim)
+  # cp_ary << "#{jruby_home}/lib/jruby-truffle.jar"
+  cp_ary
 end
 
 def resolve_classpath(jruby_home)
   if ENV['JRUBY_PARENT_CLASSPATH']
-    ENV['JRUBY_PARENT_CLASSPATH']
+    ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
   else
     cp_ary = []
     Dir.foreach("#{jruby_home}/lib") do |filename|
@@ -42,7 +42,7 @@ def resolve_classpath(jruby_home)
         end
       end
     end
-    cp_ary.join(JavaSupport.cp_delim)
+    cp_ary
   end
 end
 
@@ -62,13 +62,15 @@ end
 def __main__(argv)
   command = argv.shift
   cli_opts = JRubyOptsParser.parse!(jruby_opts_env + argv)
-  java_class = "org.jruby.Main"
+  java_class = "org/jruby/Main"
   jruby_home = resolve_jruby_home
   jruby_shell = "/bin/sh"
   jruby_cp = resolve_jruby_classpath(jruby_home)
-  classpath = jruby_cp + JavaSupport.cp_delim
-  classpath += cli_opts.classpath.join(JavaSupport.cp_delim) + JavaSupport.cp_delim
-  classpath += resolve_classpath(jruby_home)
+  classpath = (
+      jruby_cp +
+      cli_opts.classpath +
+      resolve_classpath(jruby_home)
+    ).map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
   jruby_opts = cli_opts.jruby_opts
 
   # Not really sure if this is needed
@@ -78,19 +80,18 @@ def __main__(argv)
   # java_encoding = cli_opts
   # java_encoding =|| "-Dfile.encoding=UTF-8"
 
-  all_args = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
+  all_java_opts = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
     "-Xbootclasspath/a:#{jruby_cp}",
-    # "-classpath", classpath,
+    "-Djava.class.path=#{classpath}",
     "-Djruby.home=#{jruby_home}",
     "-Djruby.lib=#{jruby_home}/lib",
     "-Djruby.script=jruby",
     "-Djruby.shell=#{jruby_shell}"
-  ] #+ cli_opts.ruby_opts
-  debug "java #{all_args.join(' ')}"
+  ]
 
   if cli_opts.verify_jruby
     # TODO ???
   else
-    JavaSupport.new.exec_java(*all_args)
+    JavaSupport.new.exec_java(java_class, all_java_opts, cli_opts.ruby_opts)
   end
 end
