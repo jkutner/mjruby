@@ -104,9 +104,6 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   }
   (*jvm)->DestroyJavaVM(jvm);
 
-  fflush(stdout);
-  fflush(stderr);
-
   return mrb_true_value();
 }
 
