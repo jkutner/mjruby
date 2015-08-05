@@ -41,16 +41,13 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   JavaVMInitArgs jvmArgs;
   JavaVMOption jvmOptions[jvmOptCount];
 
-
-
   for (int i = 0; i < jvmOptCount; i++) {
     jvmOptions[i].extraInfo = 0;
-    if (strcmp("-client", mrb_string_value_cstr(mrb, &argv[i+1])) != 0) {
-      jvmOptions[i].optionString = (char*) mrb_string_value_cstr(mrb, &argv[i+1]);
-    } else {
-      // TODO use client libjava
-      jvmOptions[i].optionString = (char*) "-server";
-      // mrb_warn(mrb, "Ignoring -client option");
+    jvmOptions[i].optionString = (char*) mrb_string_value_cstr(mrb, &argv[i+1]);
+    if (strcmp("-client", jvmOptions[i].optionString) == 0) {
+      mrb_raise(mrb, E_ARGUMENT_ERROR, "-client is not a valid option");
+    } else if (strcmp("-server", jvmOptions[i].optionString) == 0) {
+      mrb_raise(mrb, E_ARGUMENT_ERROR, "-server is not a valid option");
     }
   }
 
@@ -141,6 +138,21 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   // }
 
   (*env)->CallStaticVoidMethod(env, mainClass, mainMethod, mainArgs);
+
+  if (env && (*env)->ExceptionOccurred(env)) {
+    (*env)->ExceptionDescribe(env);
+  }
+
+  if (jvm) {
+    (*jvm)->DestroyJavaVM(jvm);
+  }
+
+#if defined(_WIN32) || defined(_WIN64)
+  if (hDll) {
+    FreeLibrary(hDll);
+  }
+#endif
+
   return mrb_true_value();
 }
 

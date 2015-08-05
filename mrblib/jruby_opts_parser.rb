@@ -37,7 +37,7 @@ class JRubyOptsParser
   end
 
   def java_opts
-    [java_mem, java_mem_min, java_stack, java_vm].compact + @java_opts
+    [java_mem, java_mem_min, java_stack].compact + @java_opts
   end
 
   private
