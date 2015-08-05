@@ -1,4 +1,24 @@
 class JavaSupport
+
+  def self.java_home
+    if ENV['JAVA_HOME']
+      if is_cygwin
+        raise "No cygwin support yet :("
+        # "`cygpath -u "$JAVA_HOME"`/bin/java"
+      else
+        ENV['JAVA_HOME']
+      end
+    else
+      path_items = ENV['PATH'].split(File::PATH_SEPARATOR)
+      path_items.each do |path_item|
+        Dir.foreach(path_item) do |filename|
+          return path_item if filename == "java"
+        end if Dir.exist?(path_item)
+      end
+      raise "No JAVA_HOME found."
+    end
+  end
+
   def self.resolve_java_command(cmd="java")
     if cmd == "java" && ENV['JAVACMD']
       ENV['JAVACMD']

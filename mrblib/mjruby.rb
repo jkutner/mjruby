@@ -8,7 +8,11 @@ end
 
 def resolve_jruby_home
   # TODO consider symlinks?
-  ENV['JRUBY_HOME'] || File.expand_path("..", Dir.pwd)
+  jruby_home = ENV['JRUBY_HOME'] || File.expand_path("..", Dir.pwd)
+  Dir.foreach(jruby_home) do |dirname|
+    return jruby_home if dirname == "lib"
+  end
+  raise "JRUBY_HOME directory is malformed: no lib directory found!"
 end
 
 def resolve_jruby_classpath(jruby_home)
@@ -89,6 +93,6 @@ def __main__(argv)
   if cli_opts.verify_jruby
     # TODO ???
   else
-    JavaSupport.exec javacmd, *all_args
+    puts "exec_java: #{exec_java("#{JavaSupport.java_home}/lib", javacmd, *all_args)}"
   end
 end

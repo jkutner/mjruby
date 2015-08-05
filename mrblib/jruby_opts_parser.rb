@@ -106,6 +106,10 @@ class JRubyOptsParser
       when "--client"
         @java_vm = "-client"
       when "--server"
+        # TODO might need to get rid of this and warn.
+        # Explicity remove -server and -client options, they are not
+        # needed, since we invoke JVM in-process and already know
+        # which DLL to use.
         @java_vm = "-server"
       when "--no-client"
         @java_vm = nil

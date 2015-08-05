@@ -13,17 +13,17 @@ MRuby::Build.new do |conf|
   gem_config(conf)
 end
 
-MRuby::CrossBuild.new('i686-pc-linux-gnu') do |conf|
-  toolchain :gcc
-
-  [conf.cc, conf.cxx, conf.linker].each do |cc|
-    cc.flags << "-m32"
-  end
-
-  conf.build_mrbtest_lib_only
-
-  gem_config(conf)
-end
+# MRuby::CrossBuild.new('i686-pc-linux-gnu') do |conf|
+#   toolchain :gcc
+#
+#   [conf.cc, conf.cxx, conf.linker].each do |cc|
+#     cc.flags << "-m32"
+#   end
+#
+#   conf.build_mrbtest_lib_only
+#
+#   gem_config(conf)
+# end
 
 MRuby::CrossBuild.new('x86_64-apple-darwin14') do |conf|
   toolchain :clang
