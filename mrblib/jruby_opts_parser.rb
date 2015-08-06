@@ -132,9 +132,7 @@ class JRubyOptsParser
         opts.clear
       when /^-.*/
         # send the rest of the options to Ruby
-        # @ruby_opts << opt
-        @ruby_opts += opts
-        opts.clear
+        @ruby_opts << opt
       else
         # Abort processing on first non-opt arg
         opts.clear

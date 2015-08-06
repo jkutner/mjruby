@@ -55,7 +55,7 @@ def jffi_opts(jruby_home)
 end
 
 def jruby_opts_env
-  # regex support is limited, so...
+  # FIXME regex support is limited, so...
   ENV['JRUBY_OPTS'].split(' ').select{|opt| !opt.empty?}.compact
 end
 
