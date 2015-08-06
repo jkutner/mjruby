@@ -27,13 +27,13 @@ def resolve_jruby_classpath(jruby_home)
     end
   end
   # cp_ary << "#{jruby_home}/lib/jruby-truffle.jar"
-  cp_ary
+  cp_ary.map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
 end
 
 def resolve_classpath(jruby_home)
-  if ENV['JRUBY_PARENT_CLASSPATH']
-    ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
-  else
+  # if ENV['JRUBY_PARENT_CLASSPATH']
+  #   ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
+  # else
     cp_ary = []
     Dir.foreach("#{jruby_home}/lib") do |filename|
       if filename.end_with?(".jar")
@@ -43,11 +43,12 @@ def resolve_classpath(jruby_home)
       end
     end
     cp_ary
-  end
+  # end
 end
 
 def java_opts(add_java_opts)
-  (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
+  add_java_opts.compact
+  # (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
 end
 
 def jffi_opts(jruby_home)
@@ -56,7 +57,8 @@ end
 
 def jruby_opts_env
   # FIXME regex support is limited, so...
-  ENV['JRUBY_OPTS'].split(' ').select{|opt| !opt.empty?}.compact
+  # (ENV['JRUBY_OPTS'] ? ENV['JRUBY_OPTS'].split(' ') : []).select{|opt| !opt.empty?}.compact
+  []
 end
 
 def __main__(argv)
@@ -65,8 +67,7 @@ def __main__(argv)
   java_class = "org/jruby/Main"
   jruby_home = resolve_jruby_home
   jruby_shell = "/bin/sh"
-  jruby_cp = resolve_jruby_classpath(jruby_home).
-      map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
+  jruby_cp = resolve_jruby_classpath(jruby_home)
   classpath = jruby_cp + JavaSupport.cp_delim + (
       cli_opts.classpath +
       resolve_classpath(jruby_home)

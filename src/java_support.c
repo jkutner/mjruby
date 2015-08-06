@@ -9,7 +9,7 @@
 #include "mruby/ext/io.h"
 
 #if defined(_WIN32) || defined(_WIN64)
-  #include <Windows.h>
+  #include <windows.h>
 #else
   #include <dlfcn.h>
 #endif
@@ -72,6 +72,18 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 
   CreateJavaVM_t* createJavaVM = NULL;
 
+#if defined(_WIN32) || defined(_WIN64)
+  char *jvmdll_path = str_with_dir("C:\\Program Files\\Java\\jdk1.8.0_51", "\\jre\\bin\\server\\jvm.dll");
+  HMODULE jvmdll = LoadLibrary(jvmdll_path);
+  if (!jvmdll) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll.");
+  }
+
+  createJavaVM = (CreateJavaVM_t*) GetProcAddress(jvmdll, "JNI_CreateJavaVM");
+  if (!createJavaVM) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "GetProcAddress for JNI_CreateJavaVM failed.");
+  }
+#elif defined(__APPLE__)
   // jli needs to be loaded on OSX because otherwise the OS tries to run the system Java
   void *libjli = dlopen(str_with_dir(java_home, "/jre/lib/jli/libjli.dylib"), RTLD_NOW + RTLD_GLOBAL);
   void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.dylib"), RTLD_NOW + RTLD_GLOBAL);
@@ -80,6 +92,14 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   if (createJavaVM == NULL) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
   }
+#else
+  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.so"), RTLD_NOW + RTLD_GLOBAL);
+
+  createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
+  if (createJavaVM == NULL) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
+  }
+#endif
 
   if (createJavaVM(&jvm, (void**)&env, &jvm_init_args) < 0) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "JVM creation failed");
@@ -115,8 +135,14 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   }
   (*jvm)->DestroyJavaVM(jvm);
 
+#if defined(_WIN32) || defined(_WIN64)
+  FreeLibrary(jvmdll);
+#elif defined(__APPLE__)
   dlclose(libjli);
   dlclose(libjvm);
+#else
+  dlclose(libjvm);
+#endif
 
   return mrb_true_value();
 }

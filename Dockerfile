@@ -8,4 +8,3 @@ ENV PATH /home/jdk/bin:$PATH
 
 ENV CFLAGS "-I/home/jdk/include -I/home/jdk/include/linux"
 ENV LD_LIBRARY_PATH "/home/jdk/jre/lib/amd64/server"
-ENV LDFLAGS="-ldl"
