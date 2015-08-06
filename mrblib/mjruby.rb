@@ -65,9 +65,9 @@ def __main__(argv)
   java_class = "org/jruby/Main"
   jruby_home = resolve_jruby_home
   jruby_shell = "/bin/sh"
-  jruby_cp = resolve_jruby_classpath(jruby_home)
-  classpath = (
-      jruby_cp +
+  jruby_cp = resolve_jruby_classpath(jruby_home).
+      map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
+  classpath = jruby_cp + JavaSupport.cp_delim + (
       cli_opts.classpath +
       resolve_classpath(jruby_home)
     ).map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
@@ -92,6 +92,7 @@ def __main__(argv)
   if cli_opts.verify_jruby
     # TODO ???
   else
+    debug "java #{all_java_opts} #{java_class} #{cli_opts.ruby_opts}"
     JavaSupport.new.exec_java(java_class, all_java_opts, cli_opts.ruby_opts)
   end
 end

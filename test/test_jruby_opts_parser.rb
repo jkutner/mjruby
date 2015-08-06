@@ -50,8 +50,8 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
     parser = JRubyOptsParser.parse!(['-e"puts 1"'])
     assert_equal ['-e"puts 1"'], parser.ruby_opts
     assert parser.valid?
-    parser = JRubyOptsParser.parse!(['-e', '"puts 1"'])
-    assert_equal ['-e', '"puts 1"'], parser.ruby_opts
+    parser = JRubyOptsParser.parse!(['-e', 'puts 1'])
+    assert_equal ['-e', 'puts 1'], parser.ruby_opts
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(['-Ilib'])
