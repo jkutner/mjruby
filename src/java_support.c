@@ -27,29 +27,10 @@ str_with_dir(char *java_home, char *path)
   return full_path;
 }
 
-static mrb_value
-mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
+static void
+launch_jvm_in_process(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_home, char *java_main_class, mrb_value *argv, int fixed_args, int java_opts_count, int ruby_opts_count, int ruby_opts_start)
 {
-  mrb_value *argv;
-  mrb_int argc;
   int i;
-
-  fflush(stdout);
-  fflush(stderr);
-
-  mrb_get_args(mrb, "*", &argv, &argc);
-  if (argc < 3) {
-    mrb_raise(mrb, E_ARGUMENT_ERROR, "wrong number of arguments");
-  }
-
-  // Process the arguments from mruby
-  int fixed_args = 0;
-  const char *java_home = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
-  const char *java_main_class = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
-  const int java_opts_count = mrb_fixnum(argv[fixed_args++]);
-  const int ruby_opts_start = fixed_args + java_opts_count;
-  const int ruby_opts_count = argc - ruby_opts_start;
-
   JavaVM *jvm;
   JNIEnv *env;
   JavaVMInitArgs jvm_init_args;
@@ -69,37 +50,6 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   jvm_init_args.nOptions = java_opts_count;
   jvm_init_args.version = JNI_VERSION_1_4;
   jvm_init_args.ignoreUnrecognized = JNI_FALSE;
-
-  CreateJavaVM_t* createJavaVM = NULL;
-
-#if defined(_WIN32) || defined(_WIN64)
-  char *jvmdll_path = str_with_dir("C:\\Program Files\\Java\\jdk1.8.0_51", "\\jre\\bin\\server\\jvm.dll");
-  HMODULE jvmdll = LoadLibrary(jvmdll_path);
-  if (!jvmdll) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll.");
-  }
-
-  createJavaVM = (CreateJavaVM_t*) GetProcAddress(jvmdll, "JNI_CreateJavaVM");
-  if (!createJavaVM) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "GetProcAddress for JNI_CreateJavaVM failed.");
-  }
-#elif defined(__APPLE__)
-  // jli needs to be loaded on OSX because otherwise the OS tries to run the system Java
-  void *libjli = dlopen(str_with_dir(java_home, "/jre/lib/jli/libjli.dylib"), RTLD_NOW + RTLD_GLOBAL);
-  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.dylib"), RTLD_NOW + RTLD_GLOBAL);
-
-  createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
-  if (createJavaVM == NULL) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
-  }
-#else
-  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.so"), RTLD_NOW + RTLD_GLOBAL);
-
-  createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
-  if (createJavaVM == NULL) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
-  }
-#endif
 
   if (createJavaVM(&jvm, (void**)&env, &jvm_init_args) < 0) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "JVM creation failed");
@@ -134,6 +84,58 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
     (*env)->ExceptionDescribe(env);
   }
   (*jvm)->DestroyJavaVM(jvm);
+}
+
+static mrb_value
+mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
+{
+  mrb_value *argv;
+  mrb_int argc;
+
+  fflush(stdout);
+  fflush(stderr);
+
+  mrb_get_args(mrb, "*", &argv, &argc);
+  if (argc < 3) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "wrong number of arguments");
+  }
+
+  // Process the arguments from mruby
+  int fixed_args = 0;
+  const char *java_home = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
+  const char *java_main_class = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
+  const int java_opts_count = mrb_fixnum(argv[fixed_args++]);
+  const int ruby_opts_start = fixed_args + java_opts_count;
+  const int ruby_opts_count = argc - ruby_opts_start;
+
+  CreateJavaVM_t* createJavaVM = NULL;
+
+#if defined(_WIN32) || defined(_WIN64)
+  // TODO discover jvm.dll
+  char *jvmdll_path = str_with_dir("C:\\Program Files\\Java\\jdk1.8.0_51", "\\jre\\bin\\server\\jvm.dll");
+  HMODULE jvmdll = LoadLibrary(jvmdll_path);
+  if (!jvmdll) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll.");
+  }
+
+  createJavaVM = (CreateJavaVM_t*) GetProcAddress(jvmdll, "JNI_CreateJavaVM");
+#elif defined(__APPLE__)
+  // jli needs to be loaded on OSX because otherwise the OS tries to run the system Java
+  void *libjli = dlopen(str_with_dir(java_home, "/jre/lib/jli/libjli.dylib"), RTLD_NOW + RTLD_GLOBAL);
+  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.dylib"), RTLD_NOW + RTLD_GLOBAL);
+
+  createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
+#else
+  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.so"), RTLD_NOW + RTLD_GLOBAL);
+
+  createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
+#endif
+
+  if (createJavaVM == NULL) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
+  } else {
+    launch_jvm_in_process(mrb, createJavaVM, java_home, java_main_class, argv, fixed_args, java_opts_count, ruby_opts_count, ruby_opts_start);
+  }
 
 #if defined(_WIN32) || defined(_WIN64)
   FreeLibrary(jvmdll);
