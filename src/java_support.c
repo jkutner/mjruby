@@ -27,10 +27,15 @@ str_with_dir(char *java_home, char *path)
   return full_path;
 }
 
-static void
-process_mrb_args()
+static char**
+process_mrb_args(mrb_state *mrb, mrb_value *argv, int offset, int count)
 {
-
+  int i;
+  char **opts = malloc(count * sizeof(void*));;
+  for (i = 0; i < count; i++) {
+    opts[i] = mrb_string_value_cstr(mrb, &argv[i+offset]);
+  }
+  return opts;
 }
 
 static void
@@ -97,7 +102,6 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 {
   mrb_value *argv;
   mrb_int argc;
-  int i;
 
   fflush(stdout);
   fflush(stderr);
@@ -114,16 +118,8 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   const int java_opts_count = mrb_fixnum(argv[java_opts_start++]);
   const int ruby_opts_start = java_opts_start + java_opts_count;
   const int ruby_opts_count = argc - ruby_opts_start;
-
-  char **java_opts = malloc(java_opts_count * sizeof(void*));;
-  for (i = 0; i < java_opts_count; i++) {
-    java_opts[i] = mrb_string_value_cstr(mrb, &argv[i+java_opts_start]);
-  }
-
-  char **ruby_opts = malloc(ruby_opts_count * sizeof(void*));;
-  for (i = 0; i < ruby_opts_count; i++) {
-    ruby_opts[i] = mrb_string_value_cstr(mrb, &argv[i+ruby_opts_start]);
-  }
+  const char **java_opts = process_mrb_args(mrb, argv, java_opts_start, java_opts_count);
+  const char **ruby_opts = process_mrb_args(mrb, argv, ruby_opts_start, ruby_opts_count);
 
   CreateJavaVM_t* createJavaVM = NULL;
 
