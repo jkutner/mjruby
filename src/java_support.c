@@ -28,17 +28,23 @@ str_with_dir(char *java_home, char *path)
 }
 
 static void
-launch_jvm_in_process(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_home, char *java_main_class, mrb_value *argv, int fixed_args, int java_opts_count, int ruby_opts_count, int ruby_opts_start)
+process_mrb_args()
+{
+
+}
+
+static void
+launch_jvm_in_process(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_main_class, char **java_opts, int java_optsc, char **ruby_opts, int ruby_optsc)
 {
   int i;
   JavaVM *jvm;
   JNIEnv *env;
   JavaVMInitArgs jvm_init_args;
-  JavaVMOption jvm_opts[java_opts_count];
+  JavaVMOption jvm_opts[java_optsc];
 
-  for (i = 0; i < java_opts_count; i++) {
+  for (i = 0; i < java_optsc; i++) {
     jvm_opts[i].extraInfo = 0;
-    jvm_opts[i].optionString = mrb_string_value_cstr(mrb, &argv[i+fixed_args]);
+    jvm_opts[i].optionString = java_opts[i];
     if (strcmp("-client", jvm_opts[i].optionString) == 0) {
       mrb_raise(mrb, E_ARGUMENT_ERROR, "-client is not a valid option");
     } else if (strcmp("-server", jvm_opts[i].optionString) == 0) {
@@ -47,7 +53,7 @@ launch_jvm_in_process(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_h
   }
 
   jvm_init_args.options = jvm_opts;
-  jvm_init_args.nOptions = java_opts_count;
+  jvm_init_args.nOptions = java_optsc;
   jvm_init_args.version = JNI_VERSION_1_4;
   jvm_init_args.ignoreUnrecognized = JNI_FALSE;
 
@@ -68,10 +74,10 @@ launch_jvm_in_process(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_h
   jclass j_class_string = (*env)->FindClass(env, "java/lang/String");
   jstring j_string_arg = (*env)->NewStringUTF(env, "");
 
-  jobjectArray main_args = (*env)->NewObjectArray(env, ruby_opts_count, j_class_string, j_string_arg);
+  jobjectArray main_args = (*env)->NewObjectArray(env, ruby_optsc, j_class_string, j_string_arg);
 
-  for (i = 0; i < ruby_opts_count; i++) {
-    jstring j_string_arg = (*env)->NewStringUTF(env, mrb_string_value_cstr(mrb, &argv[i+ruby_opts_start]));
+  for (i = 0; i < ruby_optsc; i++) {
+    jstring j_string_arg = (*env)->NewStringUTF(env, ruby_opts[i]);
     if (!j_string_arg) {
         mrb_raise(mrb, E_ARGUMENT_ERROR, "NewStringUTF() failed");
     }
@@ -91,6 +97,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 {
   mrb_value *argv;
   mrb_int argc;
+  int i;
 
   fflush(stdout);
   fflush(stderr);
@@ -101,12 +108,22 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   }
 
   // Process the arguments from mruby
-  int fixed_args = 0;
-  const char *java_home = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
-  const char *java_main_class = mrb_string_value_cstr(mrb, &argv[fixed_args++]);
-  const int java_opts_count = mrb_fixnum(argv[fixed_args++]);
-  const int ruby_opts_start = fixed_args + java_opts_count;
+  int java_opts_start = 0;
+  const char *java_home = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
+  const char *java_main_class = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
+  const int java_opts_count = mrb_fixnum(argv[java_opts_start++]);
+  const int ruby_opts_start = java_opts_start + java_opts_count;
   const int ruby_opts_count = argc - ruby_opts_start;
+
+  char **java_opts = malloc(java_opts_count * sizeof(void*));;
+  for (i = 0; i < java_opts_count; i++) {
+    java_opts[i] = mrb_string_value_cstr(mrb, &argv[i+java_opts_start]);
+  }
+
+  char **ruby_opts = malloc(ruby_opts_count * sizeof(void*));;
+  for (i = 0; i < ruby_opts_count; i++) {
+    ruby_opts[i] = mrb_string_value_cstr(mrb, &argv[i+ruby_opts_start]);
+  }
 
   CreateJavaVM_t* createJavaVM = NULL;
 
@@ -134,7 +151,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   if (createJavaVM == NULL) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
   } else {
-    launch_jvm_in_process(mrb, createJavaVM, java_home, java_main_class, argv, fixed_args, java_opts_count, ruby_opts_count, ruby_opts_start);
+    launch_jvm_in_process(mrb, createJavaVM, java_main_class, java_opts, java_opts_count, ruby_opts, ruby_opts_count);
   }
 
 #if defined(_WIN32) || defined(_WIN64)
