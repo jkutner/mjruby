@@ -8,11 +8,10 @@
 #include "mruby/string.h"
 #include "mruby/ext/io.h"
 
-
-#include <dlfcn.h>
-
 #if defined(_WIN32) || defined(_WIN64)
   #include <Windows.h>
+#else
+  #include <dlfcn.h>
 #endif
 
 #include <jni.h>
