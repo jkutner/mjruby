@@ -113,8 +113,9 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
   end
 
   def test_dash_star
-    parser = JRubyOptsParser.parse!(["-*", "-Xcompile.invokedynamic=true"])
-    assert_equal parser.ruby_opts, ["-Xcompile.invokedynamic=true"]
+    parser = JRubyOptsParser.parse!(["-rwebrick", "-Xcompile.invokedynamic=true"])
+    assert_equal parser.ruby_opts, ["-rwebrick"]
+    assert_includes parser.java_opts, "-Djruby.compile.invokedynamic=true"
     assert parser.valid?
   end
 

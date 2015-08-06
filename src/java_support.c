@@ -33,6 +33,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 {
   mrb_value *argv;
   mrb_int argc;
+  int i;
 
   fflush(stdout);
   fflush(stderr);
@@ -55,7 +56,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   JavaVMInitArgs jvm_init_args;
   JavaVMOption jvm_opts[java_opts_count];
 
-  for (int i = 0; i < java_opts_count; i++) {
+  for (i = 0; i < java_opts_count; i++) {
     jvm_opts[i].extraInfo = 0;
     jvm_opts[i].optionString = mrb_string_value_cstr(mrb, &argv[i+fixed_args]);
     if (strcmp("-client", jvm_opts[i].optionString) == 0) {
@@ -100,7 +101,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 
   jobjectArray main_args = (*env)->NewObjectArray(env, ruby_opts_count, j_class_string, j_string_arg);
 
-  for (int i = 0; i < ruby_opts_count; i++) {
+  for (i = 0; i < ruby_opts_count; i++) {
     jstring j_string_arg = (*env)->NewStringUTF(env, mrb_string_value_cstr(mrb, &argv[i+ruby_opts_start]));
     if (!j_string_arg) {
         mrb_raise(mrb, E_ARGUMENT_ERROR, "NewStringUTF() failed");
@@ -114,6 +115,9 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
     (*env)->ExceptionDescribe(env);
   }
   (*jvm)->DestroyJavaVM(jvm);
+
+  dlclose(libjli);
+  dlclose(libjvm);
 
   return mrb_true_value();
 }
