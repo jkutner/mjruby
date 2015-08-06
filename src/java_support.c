@@ -39,7 +39,7 @@ process_mrb_args(mrb_state *mrb, mrb_value *argv, int offset, int count)
 }
 
 static void
-launch_jvm_in_process(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_main_class, char **java_opts, int java_optsc, char **ruby_opts, int ruby_optsc)
+launch_jvm_in_proc(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_main_class, char **java_opts, int java_optsc, char **ruby_opts, int ruby_optsc)
 {
   int i;
   JavaVM *jvm;
@@ -128,7 +128,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   char *jvmdll_path = str_with_dir("C:\\Program Files\\Java\\jdk1.8.0_51", "\\jre\\bin\\server\\jvm.dll");
   HMODULE jvmdll = LoadLibrary(jvmdll_path);
   if (!jvmdll) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll.");
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll");
   }
 
   createJavaVM = (CreateJavaVM_t*) GetProcAddress(jvmdll, "JNI_CreateJavaVM");
@@ -136,10 +136,16 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   // jli needs to be loaded on OSX because otherwise the OS tries to run the system Java
   void *libjli = dlopen(str_with_dir(java_home, "/jre/lib/jli/libjli.dylib"), RTLD_NOW + RTLD_GLOBAL);
   void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.dylib"), RTLD_NOW + RTLD_GLOBAL);
+  if (!libjvm) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load libjvm.dylib");
+  }
 
   createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
 #else
   void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.so"), RTLD_NOW + RTLD_GLOBAL);
+  if (!libjvm) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load libjvm.so");
+  }
 
   createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
 #endif
@@ -147,7 +153,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   if (createJavaVM == NULL) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
   } else {
-    launch_jvm_in_process(mrb, createJavaVM, java_main_class, java_opts, java_opts_count, ruby_opts, ruby_opts_count);
+    launch_jvm_in_proc(mrb, createJavaVM, java_main_class, java_opts, java_opts_count, ruby_opts, ruby_opts_count);
   }
 
 #if defined(_WIN32) || defined(_WIN64)
