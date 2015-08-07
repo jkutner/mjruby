@@ -16,16 +16,24 @@
 
 #include <jni.h>
 
-typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args);
+#if defined(_WIN32) || defined(_WIN64)
+  #define JAVA_EXE "java.exe"
+  #define JAVA_SERVER_DL "\\bin\\server\\jvm.dll"
+  #define JAVA_CLIENT_DL "\\bin\\client\\jvm.dll"
+  #define JLI_DL "" // only needed for Apple
+#elif defined(__APPLE__)
+  #define JAVA_EXE "java"
+  #define JAVA_SERVER_DL "/lib/server/libjvm.dylib"
+  #define JAVA_CLIENT_DL "/lib/client/libjvm.dylib"
+  #define JLI_DL "/lib/jli/libjli.dylib"
+#else
+  #define JAVA_EXE "java"
+  #define JAVA_SERVER_DL "/lib/server/libjvm.so"
+  #define JAVA_CLIENT_DL "/lib/client/libjvm.so"
+  #define JLI_DL "" // only needed for Apple
+#endif
 
-static char*
-str_with_dir(char *java_home, char *path)
-{
-  char *full_path = malloc(strlen(java_home)+strlen(path));
-  strcpy(full_path, java_home);
-  strcat(full_path, path);
-  return full_path;
-}
+typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args);
 
 static char**
 process_mrb_args(mrb_state *mrb, mrb_value *argv, int offset, int count)
@@ -113,7 +121,8 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 
   // Process the arguments from mruby
   int java_opts_start = 0;
-  const char *java_home = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
+  const char *java_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
+  const char *jli_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const char *java_main_class = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const int java_opts_count = mrb_fixnum(argv[java_opts_start++]);
   const int ruby_opts_start = java_opts_start + java_opts_count;
@@ -124,9 +133,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   CreateJavaVM_t* createJavaVM = NULL;
 
 #if defined(_WIN32) || defined(_WIN64)
-  // TODO discover jvm.dll
-  char *jvmdll_path = str_with_dir("C:\\Program Files\\Java\\jdk1.8.0_51", "\\jre\\bin\\server\\jvm.dll");
-  HMODULE jvmdll = LoadLibrary(jvmdll_path);
+  HMODULE jvmdll = LoadLibrary(java_dl);
   if (!jvmdll) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll");
   }
@@ -134,15 +141,15 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   createJavaVM = (CreateJavaVM_t*) GetProcAddress(jvmdll, "JNI_CreateJavaVM");
 #elif defined(__APPLE__)
   // jli needs to be loaded on OSX because otherwise the OS tries to run the system Java
-  void *libjli = dlopen(str_with_dir(java_home, "/jre/lib/jli/libjli.dylib"), RTLD_NOW + RTLD_GLOBAL);
-  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.dylib"), RTLD_NOW + RTLD_GLOBAL);
+  void *libjli = dlopen(jli_dl, RTLD_NOW + RTLD_GLOBAL);
+  void *libjvm = dlopen(java_dl, RTLD_NOW + RTLD_GLOBAL);
   if (!libjvm) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load libjvm.dylib");
   }
 
   createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
 #else
-  void *libjvm = dlopen(str_with_dir(java_home, "/jre/lib/server/libjvm.so"), RTLD_NOW + RTLD_GLOBAL);
+  void *libjvm = dlopen(java_dl, RTLD_NOW + RTLD_GLOBAL);
   if (!libjvm) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load libjvm.so");
   }
@@ -171,7 +178,15 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 void
 mrb_mjruby_gem_init(mrb_state *mrb)
 {
+  struct RClass *java_support;
+
   mrb_define_method(mrb, mrb->kernel_module, "exec_java",  mrb_java_support_exec, MRB_ARGS_ANY());
+
+  java_support = mrb_define_class(mrb, "JavaSupport", mrb->object_class);
+  mrb_define_const(mrb, java_support, "JAVA_EXE", mrb_str_new_cstr(mrb, JAVA_EXE));
+  mrb_define_const(mrb, java_support, "JAVA_SERVER_DL", mrb_str_new_cstr(mrb, JAVA_SERVER_DL));
+  mrb_define_const(mrb, java_support, "JAVA_CLIENT_DL", mrb_str_new_cstr(mrb, JAVA_CLIENT_DL));
+  mrb_define_const(mrb, java_support, "JLI_DL", mrb_str_new_cstr(mrb, JLI_DL));
 }
 
 void
