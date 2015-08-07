@@ -135,6 +135,8 @@ class JRubyOptsParser
         @ruby_opts << opt
       else
         # Abort processing on first non-opt arg
+        @ruby_opts << opt
+        @ruby_opts += opts
         opts.clear
       end
     end
