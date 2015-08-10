@@ -28,8 +28,8 @@
   #define JLI_DL "/lib/jli/libjli.dylib"
 #else
   #define JAVA_EXE "java"
-  #define JAVA_SERVER_DL "/lib/server/libjvm.so"
-  #define JAVA_CLIENT_DL "/lib/client/libjvm.so"
+  #define JAVA_SERVER_DL "/lib/amd64/server/libjvm.so"
+  #define JAVA_CLIENT_DL "/lib/amd64/client/libjvm.so"
   #define JLI_DL "" // only needed for Apple
 #endif
 
