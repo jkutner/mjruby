@@ -27,6 +27,7 @@ class JavaSupport
   def resolve_native_java_home
     # ???
     # attempt_java_home(???)
+    # or maybe run out of process JVM?
     false
   end
 
