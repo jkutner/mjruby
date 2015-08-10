@@ -8,7 +8,7 @@ This is very much in beta, and needs your help!
 
 ## Usage
 
-1. Download the precompiled `mjruby` binary for your System from the [releases page]().
+1. Download the precompiled `mjruby` binary for your System from the [releases page](https://github.com/jkutner/mjruby/releases).
 2. Put the binary in the `$JRUBY_HOME/bin` dir (alongside the `jruby` command).
 3. Run JRuby by using `mjruby` instead of `jruby`.
 
