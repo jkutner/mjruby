@@ -21,6 +21,10 @@ the `mjruby` command. Please create an issue if you find a difference.
 2. Install Docker-Compose
 3. Run `docker-compose run compile`
 
+And to run the tests:
+
+1. Run `docker-compose run mtest`
+
 ## License
 
 MIT
