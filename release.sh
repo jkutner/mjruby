@@ -8,7 +8,7 @@ mv *.zip ../../../../releases
 cd ../..
 
 cd x86_64-apple-darwin14/bin
-zip mjruby_max_x86_64_bin.zip mjruby
+zip mjruby_macosx_x86_64_bin.zip mjruby
 mv *.zip ../../../../releases
 cd ../..
 
