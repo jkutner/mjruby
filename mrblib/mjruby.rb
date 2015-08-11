@@ -7,12 +7,11 @@ def warn(msg)
 end
 
 def resolve_jruby_home
-  # TODO consider symlinks?
   jruby_home = ENV['JRUBY_HOME'] || File.expand_path("..", Dir.pwd)
-  Dir.foreach(jruby_home) do |dirname|
-    return jruby_home if dirname == "lib"
+  unless Dir.exists?(File.join(jruby_home, "lib"))
+    raise "JRUBY_HOME directory is malformed: no lib directory found!"
   end
-  raise "JRUBY_HOME directory is malformed: no lib directory found!"
+  jruby_home
 end
 
 def resolve_jruby_classpath(jruby_home)
@@ -31,9 +30,9 @@ def resolve_jruby_classpath(jruby_home)
 end
 
 def resolve_classpath(jruby_home)
-  # if ENV['JRUBY_PARENT_CLASSPATH']
-  #   ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
-  # else
+  if ENV['JRUBY_PARENT_CLASSPATH']
+    ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
+  else
     cp_ary = []
     Dir.foreach("#{jruby_home}/lib") do |filename|
       if filename.end_with?(".jar")
@@ -43,11 +42,12 @@ def resolve_classpath(jruby_home)
       end
     end
     cp_ary
-  # end
+  end
 end
 
 def java_opts(add_java_opts)
   add_java_opts.compact
+  # FIXME
   # (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
 end
 
