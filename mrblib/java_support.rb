@@ -20,7 +20,7 @@ class JavaSupport
     if native_java_home
       native_java_home.strip!
       if native_java_home.match(/\/bin\/java$/)
-        native_java_home = File.expand_path("..", "..", native_java_home)
+        native_java_home = File.expand_path("../..", native_java_home)
       end
       attempt_java_home(native_java_home)
     end
