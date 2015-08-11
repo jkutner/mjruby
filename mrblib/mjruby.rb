@@ -74,9 +74,6 @@ def __main__(argv)
     ).map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
   jruby_opts = cli_opts.jruby_opts
 
-  # Not really sure if this is needed
-  ENV['JAVA_VM'] = cli_opts.java_vm
-
   all_java_opts = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
     JavaSupport::DEFAULT_JAVA_OPTS,
     "-Xbootclasspath/a:#{jruby_cp}",
