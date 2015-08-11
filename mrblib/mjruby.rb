@@ -18,31 +18,32 @@ def resolve_jruby_classpath(jruby_home)
   cp_ary = []
   jruby_already_added = false
   ["jruby.jar", "jruby-complete.jar"].each do |jruby_jar|
-    full_path_to_jar = "#{jruby_home}/lib/#{jruby_jar}"
+    full_path_to_jar = File.join(jruby_home, "lib", jruby_jar)
     if File.exist?(full_path_to_jar)
-      warn("more than one JRuby JAR found in lib directory") if jruby_already_added
+      warn("More than one JRuby JAR found in lib directory") if jruby_already_added
       cp_ary << full_path_to_jar
       jruby_already_added = true
     end
   end
-  # cp_ary << "#{jruby_home}/lib/jruby-truffle.jar"
+  # cp_ary << File.join(jruby_home, "lib", "jruby-truffle.jar")
+  raise "No JRuby JAR found in lib directory!" if cp_ary.empty?
   cp_ary.map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
 end
 
 def resolve_classpath(jruby_home)
-  if ENV['JRUBY_PARENT_CLASSPATH']
-    ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
-  else
+  # if ENV['JRUBY_PARENT_CLASSPATH']
+  #   ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
+  # else
     cp_ary = []
-    Dir.foreach("#{jruby_home}/lib") do |filename|
+    Dir.foreach(File.join(jruby_home, "lib")) do |filename|
       if filename.end_with?(".jar")
         unless ["jruby.jar", "jruby-complete.jar"].include?(filename)
-          cp_ary << "#{jruby_home}/lib/#{filename}"
+          cp_ary << File.join(jruby_home, "lib", filename)
         end
       end
     end
     cp_ary
-  end
+  # end
 end
 
 def java_opts(add_java_opts)
@@ -66,7 +67,6 @@ def __main__(argv)
   cli_opts = JRubyOptsParser.parse!(jruby_opts_env + argv)
   java_class = "org/jruby/Main"
   jruby_home = resolve_jruby_home
-  jruby_shell = "/bin/sh"
   jruby_cp = resolve_jruby_classpath(jruby_home)
   classpath = jruby_cp + JavaSupport.cp_delim + (
       cli_opts.classpath +
@@ -87,7 +87,7 @@ def __main__(argv)
     "-Djruby.home=#{jruby_home}",
     "-Djruby.lib=#{jruby_home}/lib",
     "-Djruby.script=jruby",
-    "-Djruby.shell=#{jruby_shell}"
+    "-Djruby.shell=/bin/sh" #{JRubySupport::SYSTEM_SHELL}"
   ]
 
   if cli_opts.verify_jruby

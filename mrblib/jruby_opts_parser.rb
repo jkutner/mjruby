@@ -56,19 +56,20 @@ class JRubyOptsParser
         when /^-Xss/
           @java_stack = java_opt
         when ''
-          JavaSupport.system_java "-help"
+          # TODO Need out of process Java before we can do this...
+          # JavaSupport.system_java "-help"
           puts "(Prepend -J in front of these options when using 'jruby' command)"
           @valid = false
           return
         when '-X'
-          JavaSupport.system_java "-X"
+          # TODO Need out of process Java before we can do this...
+          # JavaSupport.system_java "-X"
           puts "(Prepend -J in front of these options when using 'jruby' command)"
           @valid = false
           return
         when /(-classpath)|(-cp)/
           @classpath << opts.shift
         when /^-ea/
-          # QUESTION does this even do anything?
           @verify_jruby = true
           @java_opts << java_opt
         when /^-Dfile.encoding=/
@@ -100,16 +101,13 @@ class JRubyOptsParser
         @java_opts << "-Djruby.management.enabled=true"
       when "--headless"
         @java_opts << "-Djava.awt.headless=true"
+      # TODO Need out of process Java before we can do this...
       # when "--jdb"
       #   @java_cmd = JavaSupport.resolve_java_command("jdb")
       #   @java_opts += ["-sourcepath", "$JRUBY_HOME/lib/ruby/1.9:."]
       when "--client"
         @java_vm = "-client"
       when "--server"
-        # TODO might need to get rid of this and warn.
-        # Explicity remove -server and -client options, they are not
-        # needed, since we invoke JVM in-process and already know
-        # which DLL to use.
         @java_vm = "-server"
       when "--no-client"
         @java_vm = nil
