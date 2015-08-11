@@ -13,5 +13,5 @@ ENV JRUBY_HOME /app/.jruby
 RUN curl -s --retry 3 -L https://heroku-buildpack-ruby.s3.amazonaws.com/cedar-14/ruby-2.2.2-jruby-9.0.0.0.tgz | tar xz -C /app/.jruby
 ENV PATH /app/.jruby/bin:$PATH
 
-ENV CFLAGS "-I/home/jdk/include -I/home/jdk/include/linux"
-ENV LD_LIBRARY_PATH "/home/jdk/jre/lib/amd64/server"
+ENV CFLAGS "-I/usr/lib/jvm/java-8-openjdk-amd64/include -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux"
+ENV LD_LIBRARY_PATH "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server"
