@@ -29,14 +29,21 @@
   #define JAVA_CLIENT_DL "/lib/client/libjvm.dylib"
   #define JLI_DL "/lib/jli/libjli.dylib"
   #define SYSTEM_SHELL "/bin/sh"
-  #define DEFAULT_JAVA_OPTS ""
-#else
+  #define DEFAULT_JAVA_OPTS "-Dfile.encoding=UTF-8"
+#elif defined(__x86_64__)
   #define JAVA_EXE "java"
   #define JAVA_SERVER_DL "/lib/amd64/server/libjvm.so"
   #define JAVA_CLIENT_DL "/lib/amd64/client/libjvm.so"
   #define JLI_DL "" // only needed for Apple
   #define SYSTEM_SHELL "/bin/sh"
-  #define DEFAULT_JAVA_OPTS "-Dfile.encoding=UTF-8"
+  #define DEFAULT_JAVA_OPTS ""
+#else
+  #define JAVA_EXE "java"
+  #define JAVA_SERVER_DL "/lib/i386/server/libjvm.so"
+  #define JAVA_CLIENT_DL "/lib/i386/client/libjvm.so"
+  #define JLI_DL "" // only needed for Apple
+  #define SYSTEM_SHELL "/bin/sh"
+  #define DEFAULT_JAVA_OPTS ""
 #endif
 
 typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args);
