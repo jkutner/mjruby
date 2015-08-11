@@ -46,6 +46,38 @@ process_mrb_args(mrb_state *mrb, mrb_value *argv, int offset, int count)
   return opts;
 }
 
+static mrb_value
+mrb_find_native_java(mrb_state *mrb, mrb_value obj)
+{
+  char *java_home = NULL;
+#if defined(_WIN32) || defined(_WIN64)
+  // java_home = read_java_home_from_registry(JDK_KEY, JAVA_JRE_PREFIX, minJavaVersion);
+  // if (!java_home) {
+  //   java_home = read_java_home_from_registry(JRE_KEY, "", minJavaVersion);
+  // }
+#elif defined(__APPLE__)
+  char buff[PATH_MAX];
+
+  // Open the command for reading.
+  FILE *fp = popen("/usr/libexec/java_home", "r");
+  if (fp == NULL) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Failed to run `/usr/libexec/java_home'");
+  }
+
+  // Read only the first line of output
+  java_home = fgets(buff, sizeof(buff)-1, fp);
+
+  pclose(fp);
+#else
+  // readlink -f /usr/bin/java
+  char buff[PATH_MAX];
+  ssize_t len = readlink("/usr/bin/java", buff, sizeof(buff)-1);
+  buff[len] = NULL;
+  java_home = buff;
+#endif
+  return mrb_str_new_cstr(mrb, java_home);
+}
+
 static void
 launch_jvm_in_proc(mrb_state *mrb, CreateJavaVM_t *createJavaVM, char *java_main_class, char **java_opts, int java_optsc, char **ruby_opts, int ruby_optsc)
 {
@@ -187,6 +219,9 @@ mrb_mjruby_gem_init(mrb_state *mrb)
   mrb_define_const(mrb, java_support, "JAVA_SERVER_DL", mrb_str_new_cstr(mrb, JAVA_SERVER_DL));
   mrb_define_const(mrb, java_support, "JAVA_CLIENT_DL", mrb_str_new_cstr(mrb, JAVA_CLIENT_DL));
   mrb_define_const(mrb, java_support, "JLI_DL", mrb_str_new_cstr(mrb, JLI_DL));
+
+  mrb_define_method(mrb, java_support, "find_native_java",  mrb_find_native_java, MRB_ARGS_ANY());
+
 }
 
 void

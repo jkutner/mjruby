@@ -10,6 +10,7 @@ class JavaSupport
     elsif attempt_java_home(ENV['JAVA_HOME'])
       return true
     else
+      # maybe we shouldn't do this?
       path_items = ENV['PATH'].split(File::PATH_SEPARATOR)
       path_items.each do |path_item|
         Dir.foreach(path_item) do |filename|
@@ -19,16 +20,16 @@ class JavaSupport
         end if Dir.exist?(path_item)
       end
 
-      # return true if resolve_native_java_home
+      return true if resolve_native_java_home
     end
     raise "No JAVA_HOME found."
   end
 
   def resolve_native_java_home
-    # ???
-    # attempt_java_home(???)
-    # or maybe run out of process JVM?
-    false
+    native_java_home = find_native_java
+    if native_java_home
+      attempt_java_home(native_java_home.strip)
+    end
   end
 
   def attempt_javacmd(javacmd)
@@ -51,7 +52,10 @@ class JavaSupport
   end
 
   def is_java_home?(path, &block)
-    is_jdk_home?(path, &block) || is_jre_home?(path, &block) || false
+    is_jdk_home?(path, &block) ||
+    is_jre_home?(path, &block) ||
+    is_jdk9_home?(path, &block) ||
+    false
   end
 
   def is_jdk_home?(path)
@@ -61,6 +65,16 @@ class JavaSupport
       cdl = exists_or_nil(resolve_jdk_client_dl(path))
       if exe and (cdl or sdl)
         yield :jdk, exe, sdl, cdl
+      end
+    end
+  end
+
+  def is_jdk9_home?(path)
+    if path and Dir.exists?(path.strip)
+      exe = exists_or_nil(resolve_java_exe(path))
+      sdl = exists_or_nil(resolve_jdk9_server_dl(path))
+      if exe and sdl
+        yield :jdk9, exe, sdl, nil
       end
     end
   end
@@ -81,6 +95,10 @@ class JavaSupport
 
   def resolve_jdk_server_dl(java_home)
     File.join(java_home, "jre", JavaSupport::JAVA_SERVER_DL)
+  end
+
+  def resolve_jdk9_server_dl(java_home)
+    File.join(java_home, JavaSupport::JAVA_SERVER_DL)
   end
 
   def resolve_jdk_client_dl(java_home)
