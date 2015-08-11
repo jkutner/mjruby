@@ -9,18 +9,8 @@ class JavaSupport
       return true
     elsif attempt_java_home(ENV['JAVA_HOME'])
       return true
-    else
-      # maybe we shouldn't do this?
-      path_items = ENV['PATH'].split(File::PATH_SEPARATOR)
-      path_items.each do |path_item|
-        Dir.foreach(path_item) do |filename|
-          if filename == "java"
-            return true if attempt_java_home(File.dirname(path_item))
-          end
-        end if Dir.exist?(path_item)
-      end
-
-      return true if resolve_native_java_home
+    elsif resolve_native_java_home
+      return true
     end
     raise "No JAVA_HOME found."
   end
@@ -28,7 +18,11 @@ class JavaSupport
   def resolve_native_java_home
     native_java_home = find_native_java
     if native_java_home
-      attempt_java_home(native_java_home.strip)
+      native_java_home.strip!
+      if native_java_home.match(/\/bin\/java$/)
+        native_java_home = File.expand_path("..", "..", native_java_home)
+      end
+      attempt_java_home(native_java_home)
     end
   end
 

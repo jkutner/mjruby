@@ -46,19 +46,54 @@ process_mrb_args(mrb_state *mrb, mrb_value *argv, int offset, int count)
   return opts;
 }
 
+#if defined(_WIN32) || defined(_WIN64)
+static char *
+get_string_from_registry(HKEY rootKey, const char *keyName, const char *valueName) {
+  HKEY hKey = 0;
+  if (RegOpenKeyEx(rootKey, keyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+      DWORD valSize = 4096;
+      DWORD type = 0;
+      char val[4096] = "";
+      if (RegQueryValueEx(hKey, valueName, 0, &type, (BYTE *) val, &valSize) == ERROR_SUCCESS && type == REG_SZ) {
+          RegCloseKey(hKey);
+          return val;
+      } else {
+          printf("RegQueryValueEx() failed.\n");
+      }
+      RegCloseKey(hKey);
+  } else {
+      printf("RegOpenKeyEx() failed.\n");
+  }
+  return NULL;
+}
+
+static char *
+get_java_home_from_registry(char *java_key)
+{
+  char *version = get_string_from_registry(HKEY_LOCAL_MACHINE, java_key, "CurrentVersion");
+  if (version) {
+    char *sep = "\\";
+    char *full_java_key = malloc(strlen(java_key)+strlen(sep)+strlen(version)+1);
+    strcpy(full_java_key, java_key);
+    strcat(full_java_key, sep);
+    strcat(full_java_key, version);
+    return get_string_from_registry(HKEY_LOCAL_MACHINE, full_java_key, "JavaHome");
+  }
+  return NULL;
+}
+#endif
+
 static mrb_value
 mrb_find_native_java(mrb_state *mrb, mrb_value obj)
 {
   char *java_home = NULL;
+    char buff[PATH_MAX];
 #if defined(_WIN32) || defined(_WIN64)
-  // java_home = read_java_home_from_registry(JDK_KEY, JAVA_JRE_PREFIX, minJavaVersion);
-  // if (!java_home) {
-  //   java_home = read_java_home_from_registry(JRE_KEY, "", minJavaVersion);
-  // }
+  java_home = get_java_home_from_registry("Software\\JavaSoft\\Java Development Kit");
+  if (!java_home) {
+    java_home = get_java_home_from_registry("Software\\JavaSoft\\Java Runtime Environment");
+  }
 #elif defined(__APPLE__)
-  char buff[PATH_MAX];
-
-  // Open the command for reading.
   FILE *fp = popen("/usr/libexec/java_home", "r");
   if (fp == NULL) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Failed to run `/usr/libexec/java_home'");
@@ -66,11 +101,8 @@ mrb_find_native_java(mrb_state *mrb, mrb_value obj)
 
   // Read only the first line of output
   java_home = fgets(buff, sizeof(buff)-1, fp);
-
   pclose(fp);
 #else
-  // readlink -f /usr/bin/java
-  char buff[PATH_MAX];
   ssize_t len = readlink("/usr/bin/java", buff, sizeof(buff)-1);
   buff[len] = NULL;
   java_home = buff;
