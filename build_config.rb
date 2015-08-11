@@ -13,6 +13,20 @@ MRuby::Build.new do |conf|
   end
 
   conf.enable_bintest
+  conf.enable_debug
+
+  gem_config(conf)
+end
+
+MRuby::CrossBuild.new('x86_64-pc-linux-gnu') do |conf|
+  toolchain :gcc
+
+  [conf.cc, conf.cxx, conf.linker].each do |cc|
+    cc.flags << "-Wl,--no-as-needed"
+    cc.flags << "-ldl"
+  end
+
+  conf.build_mrbtest_lib_only
 
   gem_config(conf)
 end
