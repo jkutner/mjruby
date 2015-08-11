@@ -22,18 +22,21 @@
   #define JAVA_CLIENT_DL "\\bin\\client\\jvm.dll"
   #define JLI_DL "" // only needed for Apple
   #define SYSTEM_SHELL "cmd.exe"
+  #define DEFAULT_JAVA_OPTS ""
 #elif defined(__APPLE__)
   #define JAVA_EXE "java"
   #define JAVA_SERVER_DL "/lib/server/libjvm.dylib"
   #define JAVA_CLIENT_DL "/lib/client/libjvm.dylib"
   #define JLI_DL "/lib/jli/libjli.dylib"
   #define SYSTEM_SHELL "/bin/sh"
+  #define DEFAULT_JAVA_OPTS ""
 #else
   #define JAVA_EXE "java"
   #define JAVA_SERVER_DL "/lib/amd64/server/libjvm.so"
   #define JAVA_CLIENT_DL "/lib/amd64/client/libjvm.so"
   #define JLI_DL "" // only needed for Apple
   #define SYSTEM_SHELL "/bin/sh"
+  #define DEFAULT_JAVA_OPTS "-Dfile.encoding=UTF-8"
 #endif
 
 typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args);
@@ -255,6 +258,7 @@ mrb_mjruby_gem_init(mrb_state *mrb)
   mrb_define_const(mrb, java_support, "JAVA_CLIENT_DL", mrb_str_new_cstr(mrb, JAVA_CLIENT_DL));
   mrb_define_const(mrb, java_support, "JLI_DL", mrb_str_new_cstr(mrb, JLI_DL));
   mrb_define_const(mrb, java_support, "SYSTEM_SHELL", mrb_str_new_cstr(mrb, SYSTEM_SHELL));
+  mrb_define_const(mrb, java_support, "DEFAULT_JAVA_OPTS", mrb_str_new_cstr(mrb, DEFAULT_JAVA_OPTS));
 
   mrb_define_method(mrb, java_support, "find_native_java",  mrb_find_native_java, MRB_ARGS_ANY());
 

@@ -77,18 +77,15 @@ def __main__(argv)
   # Not really sure if this is needed
   ENV['JAVA_VM'] = cli_opts.java_vm
 
-  # TODO detect darwin
-  # java_encoding = cli_opts
-  # java_encoding =|| "-Dfile.encoding=UTF-8"
-
   all_java_opts = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
+    JavaSupport::DEFAULT_JAVA_OPTS,
     "-Xbootclasspath/a:#{jruby_cp}",
     "-Djava.class.path=#{classpath}",
     "-Djruby.home=#{jruby_home}",
     "-Djruby.lib=#{jruby_home}/lib",
     "-Djruby.script=jruby",
-    "-Djruby.shell=/bin/sh" #{JRubySupport::SYSTEM_SHELL}"
-  ]
+    "-Djruby.shell=#{JavaSupport::SYSTEM_SHELL}"
+  ].select{|o| !o.empty? }
 
   if cli_opts.verify_jruby
     # TODO ???
