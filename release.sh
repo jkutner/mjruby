@@ -17,6 +17,11 @@ zip mjruby_linux_bin.zip mjruby
 mv *.zip ../../../../releases
 cd ../..
 
+cd host/bin
+zip mjruby_linux_x86_64_bin.zip mjruby
+mv *.zip ../../../../releases
+cd ../..
+
 cd i686-w64-mingw32/bin
 zip mjruby_win_exe.zip mjruby.exe
 mv *.zip ../../../../releases
