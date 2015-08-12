@@ -1,3 +1,13 @@
+class String
+  def end_with?(s)
+
+  end
+
+  def start_with?(s)
+
+  end
+end
+
 def debug(msg)
   puts msg if ENV['MJRUBY_DEBUG']
 end
@@ -28,7 +38,7 @@ def resolve_jruby_classpath(jruby_home)
   # FIXME this doesn't work on windows. org/jruby/Main isn't found.
   # cp_ary << File.join(jruby_home, "lib", "jruby-truffle.jar")
   raise "No JRuby JAR found in lib directory!" if cp_ary.empty?
-  cp_ary.uniq.join(JavaSupport.cp_delim)
+  cp_ary.join(JavaSupport.cp_delim)
 end
 
 def resolve_classpath(jruby_home)
@@ -72,7 +82,7 @@ def __main__(argv)
   classpath = jruby_cp + JavaSupport.cp_delim + (
       cli_opts.classpath +
       resolve_classpath(jruby_home)
-    ).map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
+    ).map{|f| File.realpath(f)}.join(JavaSupport.cp_delim)
   jruby_opts = cli_opts.jruby_opts
 
   all_java_opts = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [

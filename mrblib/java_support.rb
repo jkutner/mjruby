@@ -19,7 +19,7 @@ class JavaSupport
     native_java_home = find_native_java
     if native_java_home
       native_java_home.strip!
-      if native_java_home.match(/\/bin\/java$/)
+      if native_java_home[-9..-1] == "/bin/java"
         native_java_home = File.expand_path("../..", native_java_home)
       end
       attempt_java_home(native_java_home)
@@ -64,7 +64,7 @@ class JavaSupport
   end
 
   def is_jdk9_home?(path)
-    if path and Dir.exists?(path.strip)
+    if path and Dir.exists?(path.strip!)
       exe = exists_or_nil(resolve_java_exe(path))
       sdl = exists_or_nil(resolve_jdk9_server_dl(path))
       if exe and sdl
