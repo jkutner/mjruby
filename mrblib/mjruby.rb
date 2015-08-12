@@ -1,13 +1,3 @@
-class String
-  def end_with?(s)
-
-  end
-
-  def start_with?(s)
-
-  end
-end
-
 def debug(msg)
   puts msg if ENV['MJRUBY_DEBUG']
 end
