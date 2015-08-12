@@ -37,6 +37,17 @@ class TestJavaSupport < MTest::Unit::TestCase
     assert_equal :jre, j.runtime
   end
 
+  def test_resolve_alt_javacmd
+    ENV['JAVACMD'] = "/opt/jdk/bin/jdb"
+    ENV['JAVA_HOME'] = host_java_home
+    j = JavaSupport.new
+    assert_equal "/opt/jdk", j.java_home
+    assert_equal "/opt/jdk/bin/jdb", j.java_exe
+    assert_equal "/opt/jdk/jre/lib/amd64/server/libjvm.so", j.java_server_dl
+    assert_equal "/opt/jdk/jre/lib/amd64/client/libjvm.so", j.java_client_dl
+    assert_equal :jdk, j.runtime
+  end
+
   def test_resolve_native
     ENV['JAVACMD'] = nil
     ENV['JAVA_HOME'] = nil

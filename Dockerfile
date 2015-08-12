@@ -21,6 +21,7 @@ RUN mkdir -p /opt/jdk/bin
 RUN mkdir -p /opt/jdk/jre/lib/amd64/server
 RUN mkdir -p /opt/jdk/jre/lib/amd64/client
 RUN touch /opt/jdk/bin/java
+RUN touch /opt/jdk/bin/jdb
 RUN touch /opt/jdk/jre/lib/amd64/server/libjvm.so
 RUN touch /opt/jdk/jre/lib/amd64/client/libjvm.so
 RUN mkdir -p /opt/jre/bin
