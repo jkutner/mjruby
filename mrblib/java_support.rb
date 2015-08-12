@@ -1,5 +1,11 @@
 class JavaSupport
 
+  attr_reader :java_home
+  attr_reader :java_exe
+  attr_reader :runtime
+  attr_reader :java_server_dl
+  attr_reader :java_client_dl
+
   def initialize
     resolve_java_home
   end
