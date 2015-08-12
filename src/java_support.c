@@ -119,7 +119,7 @@ mrb_find_native_java(mrb_state *mrb, mrb_value obj)
   pclose(fp);
 #else
   ssize_t len = readlink("/usr/bin/java", buff, sizeof(buff)-1);
-  buff[len] = NULL;
+  buff[len] = '\0';
   java_home = buff;
 #endif
   return mrb_str_new_cstr(mrb, java_home);
