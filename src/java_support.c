@@ -49,7 +49,7 @@
 
 typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args);
 
-static char**
+static const char**
 process_mrb_args(mrb_state *mrb, mrb_value *argv, int offset, int count)
 {
   int i;
