@@ -76,13 +76,13 @@ def __main__(argv)
   jruby_opts = cli_opts.jruby_opts
 
   all_java_opts = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
-    JavaSupport::DEFAULT_JAVA_OPTS,
+    JRubySupport::DEFAULT_JAVA_OPTS,
     "-Xbootclasspath/a:#{jruby_cp}",
     "-Djava.class.path=#{classpath}",
     "-Djruby.home=#{jruby_home}",
     "-Djruby.lib=#{jruby_home}/lib",
     "-Djruby.script=jruby",
-    "-Djruby.shell=#{JavaSupport::SYSTEM_SHELL}"
+    "-Djruby.shell=#{JRubySupport::SYSTEM_SHELL}"
   ].select{|o| !o.empty? }
 
   if cli_opts.verify_jruby

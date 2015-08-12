@@ -1,0 +1,3 @@
+class JRubySupport
+
+end
