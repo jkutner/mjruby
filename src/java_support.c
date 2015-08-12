@@ -11,6 +11,7 @@
 #if defined(_WIN32) || defined(_WIN64)
   #include <windows.h>
 #else
+  #include <string.h>
   #include <dlfcn.h>
   #include <stdlib.h>
 #endif
