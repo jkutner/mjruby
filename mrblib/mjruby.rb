@@ -32,9 +32,9 @@ def resolve_jruby_classpath(jruby_home)
 end
 
 def resolve_classpath(jruby_home)
-  # if ENV['JRUBY_PARENT_CLASSPATH']
-  #   ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
-  # else
+  if ENV['JRUBY_PARENT_CLASSPATH']
+    ENV['JRUBY_PARENT_CLASSPATH'].split(JavaSupport.cp_delim)
+  else
     cp_ary = []
     Dir.foreach(File.join(jruby_home, "lib")) do |filename|
       if filename.end_with?(".jar")
@@ -44,7 +44,7 @@ def resolve_classpath(jruby_home)
       end
     end
     cp_ary
-  # end
+  end
 end
 
 def java_opts(add_java_opts)
