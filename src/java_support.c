@@ -126,7 +126,7 @@ mrb_find_native_java(mrb_state *mrb, mrb_value obj)
 }
 
 static void
-launch_jvm_in_proc(mrb_state *mrb, CreateJavaVM_t *createJavaVM, const char *java_main_class, const char **java_opts, int java_optsc, char **ruby_opts, int ruby_optsc)
+launch_jvm_in_proc(mrb_state *mrb, CreateJavaVM_t *createJavaVM, const char *java_main_class, const char **java_opts, int java_optsc, const char **ruby_opts, int ruby_optsc)
 {
   int i;
   JavaVM *jvm;
