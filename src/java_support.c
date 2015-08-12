@@ -53,7 +53,7 @@ static char**
 process_mrb_args(mrb_state *mrb, mrb_value *argv, int offset, int count)
 {
   int i;
-  char **opts = malloc(count * sizeof(void*));;
+  const char **opts = malloc(count * sizeof(void*));;
   for (i = 0; i < count; i++) {
     opts[i] = mrb_string_value_cstr(mrb, &argv[i+offset]);
   }
