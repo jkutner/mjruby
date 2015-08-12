@@ -136,7 +136,7 @@ launch_jvm_in_proc(mrb_state *mrb, CreateJavaVM_t *createJavaVM, const char *jav
 
   for (i = 0; i < java_optsc; i++) {
     jvm_opts[i].extraInfo = 0;
-    jvm_opts[i].optionString = java_opts[i];
+    jvm_opts[i].optionString = (char *) java_opts[i];
     if (strcmp("-client", jvm_opts[i].optionString) == 0) {
       mrb_raise(mrb, E_ARGUMENT_ERROR, "-client is not a valid option");
     } else if (strcmp("-server", jvm_opts[i].optionString) == 0) {
@@ -169,7 +169,7 @@ launch_jvm_in_proc(mrb_state *mrb, CreateJavaVM_t *createJavaVM, const char *jav
   jobjectArray main_args = (*env)->NewObjectArray(env, ruby_optsc, j_class_string, j_string_arg);
 
   for (i = 0; i < ruby_optsc; i++) {
-    jstring j_string_arg = (*env)->NewStringUTF(env, ruby_opts[i]);
+    jstring j_string_arg = (*env)->NewStringUTF(env, (char *) ruby_opts[i]);
     if (!j_string_arg) {
         mrb_raise(mrb, E_ARGUMENT_ERROR, "NewStringUTF() failed");
     }
