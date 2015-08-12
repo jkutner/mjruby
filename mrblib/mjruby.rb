@@ -25,9 +25,10 @@ def resolve_jruby_classpath(jruby_home)
       jruby_already_added = true
     end
   end
+  # FIXME this doesn't work on windows. org/jruby/Main isn't found.
   # cp_ary << File.join(jruby_home, "lib", "jruby-truffle.jar")
   raise "No JRuby JAR found in lib directory!" if cp_ary.empty?
-  cp_ary.map{|f| File.realpath(f)}.uniq.join(JavaSupport.cp_delim)
+  cp_ary.uniq.join(JavaSupport.cp_delim)
 end
 
 def resolve_classpath(jruby_home)
