@@ -12,6 +12,7 @@
   #include <windows.h>
 #else
   #include <dlfcn.h>
+  #include <stdlib.h>
 #endif
 
 #include <jni.h>
