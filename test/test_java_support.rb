@@ -13,6 +13,8 @@ class TestJavaSupport < MTest::Unit::TestCase
     assert_equal "/opt/jdk/jre/lib/amd64/server/libjvm.so", j.java_server_dl
     assert_equal "/opt/jdk/jre/lib/amd64/client/libjvm.so", j.java_client_dl
     assert_equal :jdk, j.runtime
+  ensure
+    ENV['JAVA_HOME'] = host_java_home
   end
 
   def test_resolve_jre_home
@@ -24,6 +26,8 @@ class TestJavaSupport < MTest::Unit::TestCase
     assert_equal nil, j.java_server_dl
     assert_equal "/opt/jre/lib/amd64/client/libjvm.so", j.java_client_dl
     assert_equal :jre, j.runtime
+  ensure
+    ENV['JAVA_HOME'] = host_java_home
   end
 
   def test_resolve_javacmd
@@ -35,6 +39,8 @@ class TestJavaSupport < MTest::Unit::TestCase
     assert_equal nil, j.java_server_dl
     assert_equal "/opt/jre/lib/amd64/client/libjvm.so", j.java_client_dl
     assert_equal :jre, j.runtime
+  ensure
+    ENV['JAVACMD'] = nil
   end
 
   def test_resolve_alt_javacmd
@@ -46,6 +52,8 @@ class TestJavaSupport < MTest::Unit::TestCase
     assert_equal "/opt/jdk/jre/lib/amd64/server/libjvm.so", j.java_server_dl
     assert_equal "/opt/jdk/jre/lib/amd64/client/libjvm.so", j.java_client_dl
     assert_equal :jdk, j.runtime
+  ensure
+    ENV['JAVACMD'] = nil
   end
 
   def test_resolve_native
@@ -57,6 +65,8 @@ class TestJavaSupport < MTest::Unit::TestCase
     assert_equal "#{host_java_home}/jre/lib/amd64/server/libjvm.so", j.java_server_dl
     assert_equal nil, j.java_client_dl
     assert_equal :jdk, j.runtime
+  ensure
+    ENV['JAVA_HOME'] = host_java_home
   end
 end
 
