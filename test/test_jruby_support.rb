@@ -27,7 +27,7 @@ class TestJRubySupport < MTest::Unit::TestCase
 
   def test_classpath
     js = JRubySupport.new("jruby")
-    assert_equal "#{ENV['JRUBY_HOME']}/lib/jruby-truffle.jar", js.classpath
+    assert_equal ["#{ENV['JRUBY_HOME']}/lib/jruby-truffle.jar"], js.classpath
   end
 end
 

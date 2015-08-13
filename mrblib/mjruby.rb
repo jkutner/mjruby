@@ -35,15 +35,14 @@ def __main__(argv)
     ).map{|f| File.realpath(f)}.join(JavaSupport.cp_delim)
   jruby_opts = cli_opts.jruby_opts
 
-  all_java_opts = java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
-    JRubySupport::DEFAULT_JAVA_OPTS,
-    "-Xbootclasspath/a:#{jruby_cp}",
-    "-Djava.class.path=#{classpath}",
-    "-Djruby.home=#{jruby_home}",
-    "-Djruby.lib=#{jruby_home}/lib",
-    "-Djruby.script=jruby",
-    "-Djruby.shell=#{JRubySupport::SYSTEM_SHELL}"
-  ].select{|o| !o.empty? }
+  all_java_opts = jruby_support.default_java_opts +
+    java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
+      "-Xbootclasspath/a:#{jruby_cp}",
+      "-Djava.class.path=#{classpath}",
+      "-Djruby.home=#{jruby_home}",
+      "-Djruby.lib=#{jruby_home}/lib",
+      "-Djruby.script=jruby",
+      "-Djruby.shell=#{JRubySupport::SYSTEM_SHELL}"]
 
   if cli_opts.verify_jruby
     # TODO ???

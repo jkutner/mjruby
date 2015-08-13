@@ -10,6 +10,10 @@ class JRubySupport
     @classpath = resolve_classpath
   end
 
+  def default_java_opts
+    [JRubySupport::DEFAULT_JAVA_OPTS].select{|o| !o.empty? }
+  end
+
   def search_path(cmd)
     # This could affect start up time
     path_items = ENV['PATH'].split(File::PATH_SEPARATOR)
