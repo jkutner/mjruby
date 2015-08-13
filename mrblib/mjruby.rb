@@ -6,14 +6,6 @@ def warn(msg)
   puts "WARNING: #{msg}"
 end
 
-def resolve_jruby_home
-  jruby_home = ENV['JRUBY_HOME'] || File.expand_path("..", Dir.pwd)
-  unless Dir.exists?(File.join(jruby_home, "lib"))
-    raise "JRUBY_HOME directory is malformed: no lib directory found!"
-  end
-  jruby_home
-end
-
 def resolve_jruby_classpath(jruby_home)
   cp_ary = []
   jruby_already_added = false
@@ -65,9 +57,10 @@ end
 
 def __main__(argv)
   command = argv.shift
+  jruby_support = JRubySupport.new(command)
   cli_opts = JRubyOptsParser.parse!(jruby_opts_env + argv)
   java_class = "org/jruby/Main"
-  jruby_home = resolve_jruby_home
+  jruby_home = jruby_support.jruby_home
   jruby_cp = resolve_jruby_classpath(jruby_home)
   classpath = jruby_cp + JavaSupport.cp_delim + (
       cli_opts.classpath +
