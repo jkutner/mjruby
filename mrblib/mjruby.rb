@@ -20,7 +20,8 @@ def __main__(argv)
   jruby_opts = cli_opts.jruby_opts
 
   all_java_opts = jruby_support.default_java_opts +
-    java_opts(cli_opts.java_opts) + jffi_opts(jruby_home) + [
+    jruby_support.java_opts(cli_opts.java_opts) +
+    jruby_support.jffi_opts + [
       "-Xbootclasspath/a:#{jruby_cp}",
       "-Djava.class.path=#{classpath}",
       "-Djruby.home=#{jruby_home}",
