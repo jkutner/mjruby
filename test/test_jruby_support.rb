@@ -29,6 +29,26 @@ class TestJRubySupport < MTest::Unit::TestCase
     js = JRubySupport.new("jruby")
     assert_equal ["#{ENV['JRUBY_HOME']}/lib/jruby-truffle.jar"], js.classpath
   end
+
+  def test_jruby_opts_env
+    ENV['JRUBY_OPTS'] = nil
+    js = JRubySupport.new("jruby")
+    assert_equal [], js.jruby_opts_env
+
+    ENV['JRUBY_OPTS'] = ""
+    js = JRubySupport.new("jruby")
+    assert_equal [], js.jruby_opts_env
+
+    ENV['JRUBY_OPTS'] = "--dev"
+    js = JRubySupport.new("jruby")
+    assert_equal ["--dev"], js.jruby_opts_env
+
+    ENV['JRUBY_OPTS'] = "--dev -J-Xmx1g"
+    js = JRubySupport.new("jruby")
+    assert_equal ["--dev", "-J-Xmx1g"], js.jruby_opts_env
+  ensure
+    ENV["JRUBY_OPTS"] = nil
+  end
 end
 
 MTest::Unit.new.run

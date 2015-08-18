@@ -10,6 +10,19 @@ class JRubySupport
     @classpath = resolve_classpath
   end
 
+  def java_opts(add_java_opts)
+    add_java_opts.compact
+    (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
+  end
+
+  def jffi_opts
+    ["-Djffi.boot.library.path=#{jruby_home}/lib/jni"]
+  end
+
+  def jruby_opts_env
+    (ENV['JRUBY_OPTS'] ? ENV['JRUBY_OPTS'].split(' ') : []).select{|opt| !opt.empty?}.compact
+  end
+
   def default_java_opts
     [JRubySupport::DEFAULT_JAVA_OPTS].select{|o| !o.empty? }
   end

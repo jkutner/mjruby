@@ -6,26 +6,10 @@ def warn(msg)
   puts "WARNING: #{msg}"
 end
 
-def java_opts(add_java_opts)
-  add_java_opts.compact
-  # FIXME
-  # (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
-end
-
-def jffi_opts(jruby_home)
-  ["-Djffi.boot.library.path=#{jruby_home}/lib/jni"]
-end
-
-def jruby_opts_env
-  # FIXME regex support is limited, so...
-  # (ENV['JRUBY_OPTS'] ? ENV['JRUBY_OPTS'].split(' ') : []).select{|opt| !opt.empty?}.compact
-  []
-end
-
 def __main__(argv)
   command = argv.shift
   jruby_support = JRubySupport.new(command)
-  cli_opts = JRubyOptsParser.parse!(jruby_opts_env + argv)
+  cli_opts = JRubyOptsParser.parse!(jruby_support.jruby_opts_env + argv)
   java_class = "org/jruby/Main"
   jruby_home = jruby_support.jruby_home
   jruby_cp = jruby_support.jruby_classpath
