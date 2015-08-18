@@ -49,6 +49,30 @@ class TestJRubySupport < MTest::Unit::TestCase
   ensure
     ENV["JRUBY_OPTS"] = nil
   end
+
+  def test_java_opts
+    ENV['JAVA_OPTS'] = nil
+    js = JRubySupport.new("jruby")
+    assert_equal [], js.java_opts([])
+
+    ENV['JAVA_OPTS'] = ""
+    js = JRubySupport.new("jruby")
+    assert_equal [], js.java_opts([])
+
+    ENV['JAVA_OPTS'] = "-Dwarbler.port=3000"
+    js = JRubySupport.new("jruby")
+    assert_equal ["-Dwarbler.port=3000"], js.java_opts([])
+
+    ENV['JAVA_OPTS'] = "-Xmx1g -XX:MaxDirectMemorySize=64m"
+    js = JRubySupport.new("jruby")
+    assert_equal ["-Xmx1g", "-XX:MaxDirectMemorySize=64m"], js.java_opts([])
+
+    ENV['JAVA_OPTS'] = "-Dwarbler.port=3000"
+    js = JRubySupport.new("jruby")
+    assert_equal ["-Dwarbler.port=3000", "-XX:MaxDirectMemorySize=64m"], js.java_opts(['-XX:MaxDirectMemorySize=64m'])
+  ensure
+    ENV["JAVA_OPTS"] = nil
+  end
 end
 
 MTest::Unit.new.run
