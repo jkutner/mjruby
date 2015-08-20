@@ -296,45 +296,47 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   const char *java_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const char *jli_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const char *java_main_class = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
-  const int java_opts_count = mrb_fixnum(argv[java_opts_start++]);
-  const int ruby_opts_start = java_opts_start + java_opts_count;
-  const int ruby_opts_count = argc - ruby_opts_start;
-  const char **java_opts = process_mrb_args(mrb, argv, java_opts_start, java_opts_count);
-  const char **ruby_opts = process_mrb_args(mrb, argv, ruby_opts_start, ruby_opts_count);
+  const int java_optsc = mrb_fixnum(argv[java_opts_start++]);
+  const int ruby_opts_start = java_opts_start + java_optsc;
+  const int ruby_optsc = argc - ruby_opts_start;
+  const char **java_opts = process_mrb_args(mrb, argv, java_opts_start, java_optsc);
+  const char **ruby_opts = process_mrb_args(mrb, argv, ruby_opts_start, ruby_optsc);
 
   CreateJavaVM_t* createJavaVM = NULL;
 
 #if defined(_WIN32) || defined(_WIN64)
-  disableFolderVirtualization(GetCurrentProcess());
+  disable_folder_virtualization(GetCurrentProcess());
   HMODULE jvmdll = LoadLibrary(java_dl);
   if (!jvmdll) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll");
+    mrb_warn(mrb, "Cannot load jvm.dll. Running out of process.");
+    printf("\n");
+  } else {
+    createJavaVM = (CreateJavaVM_t*) GetProcAddress(jvmdll, "JNI_CreateJavaVM");
   }
-
-  createJavaVM = (CreateJavaVM_t*) GetProcAddress(jvmdll, "JNI_CreateJavaVM");
 #elif defined(__APPLE__)
   // jli needs to be loaded on OSX because otherwise the OS tries to run the system Java
   void *libjli = dlopen(jli_dl, RTLD_NOW + RTLD_GLOBAL);
   void *libjvm = dlopen(java_dl, RTLD_NOW + RTLD_GLOBAL);
   if (!libjvm) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load libjvm.dylib");
+    mrb_warn(mrb, "Cannot load libjvm.dylib. Running out of process.");
+    printf("\n");
+  } else {
+    createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
   }
-
-  createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
 #else
   void *libjvm = dlopen(java_dl, RTLD_NOW + RTLD_GLOBAL);
   if (!libjvm) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load libjvm.so");
+    mrb_warn(mrb, "Cannot load libjvm.so. Running out of process.");
+    printf("\n");
+  } else {
+    createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
   }
-
-  createJavaVM = (CreateJavaVM_t*) dlsym(libjvm, "JNI_CreateJavaVM");
 #endif
 
   if (createJavaVM == NULL) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Could not load JVM");
+    launch_jvm_out_of_proc(mrb, java_exe, java_main_class, java_opts, java_optsc, ruby_opts, ruby_optsc);
   } else {
-    launch_jvm_out_of_proc(mrb, java_exe, java_main_class, java_opts, java_opts_count, ruby_opts, ruby_opts_count);
-    //launch_jvm_in_proc(mrb, createJavaVM, java_main_class, java_opts, java_opts_count, ruby_opts, ruby_opts_count);
+    launch_jvm_in_proc(mrb, createJavaVM, java_main_class, java_opts, java_optsc, ruby_opts, ruby_optsc);
   }
 
 #if defined(_WIN32) || defined(_WIN64)
