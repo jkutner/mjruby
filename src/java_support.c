@@ -15,11 +15,12 @@
   #include <dlfcn.h>
   #include <stdlib.h>
   #include <unistd.h>
-  #include <signal.h>
+  #include <signal.h> // This is specific to mrb_p_exec
 #endif
 
 #include <jni.h>
 
+// This is specific to mrb_p_exec
 static struct {
   const char *name;
   int no;
@@ -128,7 +129,7 @@ static mrb_value
 mrb_find_native_java(mrb_state *mrb, mrb_value obj)
 {
   char *java_home = NULL;
-    char buff[PATH_MAX];
+  char buff[PATH_MAX];
 #if defined(_WIN32) || defined(_WIN64)
   java_home = get_java_home_from_registry("Software\\JavaSoft\\Java Development Kit");
   if (!java_home) {
