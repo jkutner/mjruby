@@ -68,7 +68,9 @@ class JavaSupport
   end
 
   def resolve_java_exe(java_home)
-    File.join(java_home, "bin", JavaSupport::JAVA_EXE)
+    # FIXME is this *nix only?
+    # File.join(java_home, "bin", JavaSupport::JAVA_EXE)
+    [java_home, "bin", JavaSupport::JAVA_EXE].join("\\")
   end
 
   def resolve_jdk_server_dl(java_home)
@@ -118,7 +120,7 @@ class JavaSupport
   def exec_java(java_class, java_opts, ruby_opts)
     resolve_java_dls(java_opts) do |parsed_java_opts, java_dl, jli_dl|
       all_opts = parsed_java_opts + ruby_opts
-      Kernel.exec_java java_dl, jli_dl, java_class, parsed_java_opts.size, *all_opts
+      Kernel.exec_java @java_exe, java_dl, jli_dl, java_class, parsed_java_opts.size, *all_opts
     end
   end
 

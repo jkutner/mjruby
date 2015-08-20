@@ -1,0 +1,78 @@
+#ifdef SIGABRT
+  { "ABRT", SIGABRT },
+#endif
+#ifdef SIGALRM
+  { "ALRM", SIGALRM },
+#endif
+#ifdef SIGBUS
+  { "BUS", SIGBUS },
+#endif
+#ifdef SIGCHLD
+  { "CHLD", SIGCHLD },
+#endif
+#ifdef SIGCONT
+  { "CONT", SIGCONT },
+#endif
+#ifdef SIGFPE
+  { "FPE", SIGFPE },
+#endif
+#ifdef SIGHUP
+  { "HUP", SIGHUP },
+#endif
+#ifdef SIGILL
+  { "ILL", SIGILL },
+#endif
+#ifdef SIGINT
+  { "INT", SIGINT },
+#endif
+#ifdef SIGKILL
+  { "KILL", SIGKILL },
+#endif
+#ifdef SIGPIPE
+  { "PIPE", SIGPIPE },
+#endif
+#ifdef SIGPROF
+  { "PROF", SIGPROF },
+#endif
+#ifdef SIGQUIT
+  { "QUIT", SIGQUIT },
+#endif
+#ifdef SIGSEGV
+  { "SEGV", SIGSEGV },
+#endif
+#ifdef SIGSTOP
+  { "STOP", SIGSTOP },
+#endif
+#ifdef SIGSYS
+  { "SYS", SIGSYS },
+#endif
+#ifdef SIGTERM
+  { "TERM", SIGTERM },
+#endif
+#ifdef SIGTRAP
+  { "TRAP", SIGTRAP },
+#endif
+#ifdef SIGTSTP
+  { "TSTP", SIGTSTP },
+#endif
+#ifdef SIGTTIN
+  { "TTIN", SIGTTIN },
+#endif
+#ifdef SIGTTOU
+  { "TTOU", SIGTTOU },
+#endif
+#ifdef SIGURG
+  { "URG", SIGURG },
+#endif
+#ifdef SIGUSR1
+  { "USR1", SIGUSR1 },
+#endif
+#ifdef SIGUSR2
+  { "USR2", SIGUSR2 },
+#endif
+#ifdef SIGXCPU
+  { "XCPU", SIGXCPU },
+#endif
+#ifdef SIGXFSZ
+  { "XFSZ", SIGXFSZ },
+#endif
