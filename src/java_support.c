@@ -166,6 +166,9 @@ static mrb_value
 mrb_p_exec(const char **pargv, int pargc)
 {
   int ret, i;
+
+  fflush(stdout);
+  fflush(stderr);
 #if defined(_WIN32) || defined(_WIN64)
   char cmd[32*1024] = "";
   for (i = 0; i < pargc-1; i++) {
@@ -185,9 +188,7 @@ mrb_p_exec(const char **pargv, int pargc)
   disable_folder_virtualization(pi.hProcess);
   ResumeThread(pi.hThread);
   WaitForSingleObject(pi.hProcess, INFINITE);
-  // if (retCode) {
-  //   GetExitCodeProcess(pi.hProcess, retCode);
-  // }
+
   CloseHandle(pi.hProcess);
   CloseHandle(pi.hThread);
   return mrb_true_value();
@@ -315,6 +316,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   CreateJavaVM_t* createJavaVM = NULL;
 
 #if defined(_WIN32) || defined(_WIN64)
+  disableFolderVirtualization(GetCurrentProcess());
   HMODULE jvmdll = LoadLibrary(java_dl);
   if (!jvmdll) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot load jvm.dll");

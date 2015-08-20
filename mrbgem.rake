@@ -8,5 +8,5 @@ MRuby::Gem::Specification.new('mjruby') do |spec|
   spec.add_dependency 'mruby-env', :mgem => 'mruby-env'
   spec.add_dependency 'mruby-dir', :mgem => 'mruby-dir'
   spec.add_dependency 'mruby-string-ext', :core => 'mruby-string-ext'
-  spec.add_dependency 'mruby-io', :github => 'hone/mruby-io'
+  spec.add_dependency 'mruby-io', :github => 'jkutner/mruby-io'
 end

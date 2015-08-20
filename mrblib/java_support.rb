@@ -68,9 +68,7 @@ class JavaSupport
   end
 
   def resolve_java_exe(java_home)
-    # FIXME is this *nix only?
-    # File.join(java_home, "bin", JavaSupport::JAVA_EXE)
-    [java_home, "bin", JavaSupport::JAVA_EXE].join("\\")
+    File.join(java_home, "bin", JavaSupport::JAVA_EXE)
   end
 
   def resolve_jdk_server_dl(java_home)
