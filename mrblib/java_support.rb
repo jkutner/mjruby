@@ -115,9 +115,9 @@ class JavaSupport
     yield java_opts.select{|o| !["-client","-server"].include?(o) }, java_dl, resolve_jli_dl
   end
 
-  def exec_java(java_class, java_opts, ruby_opts)
+  def exec_java(java_class, java_opts, program_opts)
     resolve_java_dls(java_opts) do |parsed_java_opts, java_dl, jli_dl|
-      all_opts = parsed_java_opts + ruby_opts
+      all_opts = parsed_java_opts + program_opts
       Kernel.exec_java @java_exe, java_dl, jli_dl, java_class, parsed_java_opts.size, *all_opts
     end
   end
