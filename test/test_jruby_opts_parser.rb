@@ -44,28 +44,28 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
     assert_equal ["-Ctmp"], parser.ruby_opts
     assert parser.valid?
     parser = JRubyOptsParser.parse!(["-C", "tmp"])
-    assert_equal ["-C", "tmp"], parser.ruby_opts
+    assert_equal ["-Ctmp"], parser.ruby_opts
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(['-e"puts 1"'])
     assert_equal ['-e"puts 1"'], parser.ruby_opts
     assert parser.valid?
     parser = JRubyOptsParser.parse!(['-e', 'puts 1'])
-    assert_equal ['-e', 'puts 1'], parser.ruby_opts
+    assert_equal ['-eputs 1'], parser.ruby_opts
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(['-Ilib'])
     assert_equal ['-Ilib'], parser.ruby_opts
     assert parser.valid?
     parser = JRubyOptsParser.parse!(['-I', 'lib'])
-    assert_equal ['-I', 'lib'], parser.ruby_opts
+    assert_equal ['-Ilib'], parser.ruby_opts
     assert parser.valid?
 
     parser = JRubyOptsParser.parse!(['-Srake'])
     assert_equal ['-Srake'], parser.ruby_opts
     assert parser.valid?
     parser = JRubyOptsParser.parse!(['-S', 'rake'])
-    assert_equal ['-S', 'rake'], parser.ruby_opts
+    assert_equal ['-Srake'], parser.ruby_opts
     assert parser.valid?
   end
 
