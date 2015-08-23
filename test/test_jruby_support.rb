@@ -1,5 +1,13 @@
 class TestJRubySupport < MTest::Unit::TestCase
 
+  def test_resolve_exe_path
+    js = JRubySupport.new("jruby")
+    assert_equal "C:/jruby-9.0.0.0", js.resolve_exe_path("C:/jruby-9.0.0.0/bin/jruby")
+
+    js = JRubySupport.new("jruby")
+    assert_equal "/user/lib/jruby", js.resolve_exe_path("/user/lib/jruby/bin/jruby")
+  end
+
   def test_jruby_home
     real_jruby_home = ENV['JRUBY_HOME']
     js = JRubySupport.new("jruby")

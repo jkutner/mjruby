@@ -41,7 +41,7 @@ class JRubySupport
   end
 
   def resolve_exe_path(cmd)
-    if cmd.start_with?(File::SEPARATOR) #|| cmd[1..2] == ":#{File::SEPARATOR}"
+    if cmd.start_with?(File::SEPARATOR) || cmd[1..2] == ":#{File::SEPARATOR}"
       return File.expand_path("..#{File::SEPARATOR}..", cmd)
     else
       from_path = search_path(cmd)
