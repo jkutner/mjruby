@@ -209,7 +209,9 @@ launch_jvm_out_of_proc(mrb_state *mrb, const char *java_exe, const char *java_ma
   for (i = 0; i < java_optsc; i++) {
     pargv[i+1] = java_opts[i];
   }
-  pargv[java_optsc+1] = java_main_class;
+  if (java_main_class) {
+    pargv[java_optsc+1] = java_main_class;
+  }
   for (i = 0; i < ruby_optsc; i++) {
     pargv[i+java_optsc+2] = ruby_opts[i];
   }
@@ -287,12 +289,13 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   fflush(stderr);
 
   mrb_get_args(mrb, "*", &argv, &argc);
-  if (argc < 3) {
+  if (argc < 6) {
     mrb_raise(mrb, E_ARGUMENT_ERROR, "wrong number of arguments");
   }
 
   // Process the arguments from mruby
   int java_opts_start = 0;
+  const int *in_proc = mrb_fixnum(argv[java_opts_start++]);
   const char *java_exe = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const char *java_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const char *jli_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
@@ -302,6 +305,11 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   const int ruby_optsc = argc - ruby_opts_start;
   const char **java_opts = process_mrb_args(mrb, argv, java_opts_start, java_optsc);
   const char **ruby_opts = process_mrb_args(mrb, argv, ruby_opts_start, ruby_optsc);
+
+  if (in_proc != 0) {
+    launch_jvm_out_of_proc(mrb, java_exe, java_main_class, java_opts, java_optsc, ruby_opts, ruby_optsc);
+    return mrb_true_value();
+  }
 
   CreateJavaVM_t* createJavaVM = NULL;
 

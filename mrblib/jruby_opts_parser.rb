@@ -54,17 +54,13 @@ class JRubyOptsParser
         elsif java_opt.start_with?("-Xss")
           @java_stack = java_opt
         elsif java_opt.empty?
-          # TODO Need out of process Java before we can do this...
-          # JavaSupport.system_java "-help"
           puts "(Prepend -J in front of these options when using 'jruby' command)"
-          @valid = false
-          return
+          JavaSupport.new.exec_java_proc(["-help"])
+          Kernel.exit
         elsif java_opt.start_with?("-X")
-          # TODO Need out of process Java before we can do this...
-          # JavaSupport.system_java "-X"
           puts "(Prepend -J in front of these options when using 'jruby' command)"
-          @valid = false
-          return
+          JavaSupport.new.exec_java_proc(["-X"])
+          Kernel.exit
         elsif java_opt.start_with?("-cp") || java_opt.start_with?("-classpath")
           @classpath << opts.shift
         elsif java_opt.start_with?("-ea")

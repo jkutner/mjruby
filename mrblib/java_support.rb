@@ -118,7 +118,14 @@ class JavaSupport
   def exec_java(java_class, java_opts, program_opts)
     resolve_java_dls(java_opts) do |parsed_java_opts, java_dl, jli_dl|
       all_opts = parsed_java_opts + program_opts
-      Kernel.exec_java @java_exe, java_dl, jli_dl, java_class, parsed_java_opts.size, *all_opts
+      Kernel.exec_java 0, @java_exe, java_dl, jli_dl, java_class, parsed_java_opts.size, *all_opts
+    end
+  end
+
+  def exec_java_proc(java_opts, program_opts=[])
+    resolve_java_dls(java_opts) do |parsed_java_opts, java_dl, jli_dl|
+      all_opts = parsed_java_opts + program_opts
+      Kernel.exec_java 1, @java_exe, java_dl, jli_dl, nil, parsed_java_opts.size, *all_opts
     end
   end
 

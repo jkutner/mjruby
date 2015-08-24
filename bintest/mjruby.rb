@@ -23,10 +23,23 @@ assert('setup') do
       assert_true status.success?, "Process did not exit cleanly"
       assert_include output, "Hello World"
 
-      output, status = Open3.capture2(
+      output, error, status = Open3.capture3(
         "#{BIN_PATH} -rwebrick -e 'puts WEBrick::HTTPServer.new(:Port => 3000, :DocumentRoot => Dir.pwd)'")
       assert_true status.success?, "Process did not exit cleanly"
       assert_include output, "WEBrick::HTTPServer"
+      assert_include error, "INFO  WEBrick 1.3.1"
+
+      output, error, status = Open3.capture3(
+        "#{BIN_PATH} -J-X")
+      assert_true status.success?, "Process did not exit cleanly"
+      assert_include output, "(Prepend -J in front of these options when using 'jruby' command)"
+      assert_include error, "The -X options are non-standard and subject to change without notice."
+
+      output, error, status = Open3.capture3(
+        "#{BIN_PATH} -J")
+      assert_true status.success?, "Process did not exit cleanly"
+      assert_include output, "(Prepend -J in front of these options when using 'jruby' command)"
+      assert_include error, "Usage: java"
     end
   end
 end
