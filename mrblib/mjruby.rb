@@ -21,18 +21,14 @@ def __main__(argv)
 
   all_java_opts = jruby_support.default_java_opts +
     jruby_support.java_opts(cli_opts.java_opts) +
-    jruby_support.jffi_opts + [
-      "-Xbootclasspath/a:#{jruby_cp}",
-      "-Djava.class.path=#{classpath}",
+    jruby_support.jffi_opts +
+    (cli_opts.verify_jruby ? [] : ["-Xbootclasspath/a:#{jruby_cp}"]) +
+    [ "-Djava.class.path=#{classpath}",
       "-Djruby.home=#{jruby_home}",
       "-Djruby.lib=#{jruby_home}/lib",
       "-Djruby.script=jruby",
       "-Djruby.shell=#{JRubySupport::SYSTEM_SHELL}"]
 
-  if cli_opts.verify_jruby
-    # TODO ???
-  else
-    debug "java #{all_java_opts} #{java_class} #{cli_opts.ruby_opts}"
-    JavaSupport.new.exec_java(java_class, all_java_opts, cli_opts.ruby_opts)
-  end
+  debug "java #{all_java_opts} #{java_class} #{cli_opts.ruby_opts}"
+  JavaSupport.new.exec_java(java_class, all_java_opts, cli_opts.ruby_opts)
 end

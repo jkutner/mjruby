@@ -92,10 +92,8 @@ class JRubyOptsParser
         @java_opts << "-Djruby.management.enabled=true"
       elsif opt == "--headless"
         @java_opts << "-Djava.awt.headless=true"
-      # TODO Need out of process Java before we can do this...
-      # elsif opt == "--jdb"
-      #   @java_cmd = JavaSupport.resolve_java_command("jdb")
-      #   @java_opts += ["-sourcepath", "$JRUBY_HOME/lib/ruby/1.9:."]
+      elsif opt == "--jdb"
+        puts "WARNING: --jdb is not supported. Use jruby.bash instead."
       elsif opt == "--client"
         @java_vm = "-client"
       elsif opt == "--server"

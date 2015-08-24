@@ -40,6 +40,11 @@ assert('setup') do
       assert_true status.success?, "Process did not exit cleanly"
       assert_include output, "(Prepend -J in front of these options when using 'jruby' command)"
       assert_include error, "Usage: java"
+
+      output, status = Open3.capture2(
+        "#{BIN_PATH} -J-ea -e \"puts 'Hello World'\"")
+      assert_true status.success?, "Process did not exit cleanly"
+      assert_include output, "Hello World"
     end
   end
 end

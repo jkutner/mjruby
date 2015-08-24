@@ -69,10 +69,6 @@ class TestJrubyOptsParser < MTest::Unit::TestCase
     assert parser.valid?
   end
 
-  def test_ea
-    # ???
-  end
-
   def test_parse_x_opts
     parser = JRubyOptsParser.parse!(["-Xcompile.invokedynamic=true"])
     assert_includes parser.java_opts, "-Djruby.compile.invokedynamic=true"
