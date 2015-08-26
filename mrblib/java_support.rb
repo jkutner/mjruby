@@ -6,6 +6,14 @@ class JavaSupport
   attr_reader :java_server_dl
   attr_reader :java_client_dl
 
+  def self.exec_java(java_class, java_opts, program_opts)
+    new.exec_java(java_class, java_opts, program_opts)
+  end
+
+  def self.system_java(java_opts, program_opts=[])
+    new.system_java(java_opts, program_opts)
+  end
+
   def initialize
     @runtime, @java_exe, @java_server_dl, @java_client_dl, @java_home = resolve_java_home
   end
@@ -118,14 +126,14 @@ class JavaSupport
   def exec_java(java_class, java_opts, program_opts)
     resolve_java_dls(java_opts) do |parsed_java_opts, java_dl, jli_dl|
       all_opts = parsed_java_opts + program_opts
-      Kernel.exec_java 0, @java_exe, java_dl, jli_dl, java_class, parsed_java_opts.size, *all_opts
+      _exec_java_ @java_exe, java_dl, jli_dl, java_class, parsed_java_opts.size, *all_opts
     end
   end
 
-  def exec_java_proc(java_opts, program_opts=[])
+  def system_java(java_opts, program_opts=[])
     resolve_java_dls(java_opts) do |parsed_java_opts, java_dl, jli_dl|
       all_opts = parsed_java_opts + program_opts
-      Kernel.exec_java 1, @java_exe, java_dl, jli_dl, nil, parsed_java_opts.size, *all_opts
+      _system_java_ @java_exe, java_dl, jli_dl, nil, parsed_java_opts.size, *all_opts
     end
   end
 

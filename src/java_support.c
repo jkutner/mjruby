@@ -280,7 +280,7 @@ launch_jvm_in_proc(mrb_state *mrb, CreateJavaVM_t *createJavaVM, const char *jav
 }
 
 static mrb_value
-mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
+mrb_launch_jvm(mrb_state *mrb, const int in_proc, mrb_value obj)
 {
   mrb_value *argv;
   mrb_int argc;
@@ -295,7 +295,6 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
 
   // Process the arguments from mruby
   int java_opts_start = 0;
-  const int *in_proc = mrb_fixnum(argv[java_opts_start++]);
   const char *java_exe = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const char *java_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
   const char *jli_dl = mrb_string_value_cstr(mrb, &argv[java_opts_start++]);
@@ -307,6 +306,7 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   const char **ruby_opts = process_mrb_args(mrb, argv, ruby_opts_start, ruby_optsc);
 
   if (in_proc != 0) {
+    printf("%s\n", java_exe);
     launch_jvm_out_of_proc(mrb, java_exe, java_main_class, java_opts, java_optsc, ruby_opts, ruby_optsc);
     return mrb_true_value();
   }
@@ -360,12 +360,23 @@ mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
   return mrb_true_value();
 }
 
+
+static mrb_value
+mrb_java_support_exec(mrb_state *mrb, mrb_value obj)
+{
+  return mrb_launch_jvm(mrb, 0, obj);
+}
+
+static mrb_value
+mrb_java_support_system(mrb_state *mrb, mrb_value obj)
+{
+  return mrb_launch_jvm(mrb, 1, obj);
+}
+
 void
 mrb_init_java_support(mrb_state *mrb)
 {
   struct RClass *java_support;
-
-  mrb_define_method(mrb, mrb->kernel_module, "exec_java",  mrb_java_support_exec, MRB_ARGS_ANY());
 
   java_support = mrb_define_class(mrb, "JavaSupport", mrb->object_class);
   mrb_define_const(mrb, java_support, "JAVA_EXE", mrb_str_new_cstr(mrb, JAVA_EXE));
@@ -374,5 +385,7 @@ mrb_init_java_support(mrb_state *mrb)
   mrb_define_const(mrb, java_support, "JLI_DL", mrb_str_new_cstr(mrb, JLI_DL));
 
   mrb_define_method(mrb, java_support, "find_native_java",  mrb_find_native_java, MRB_ARGS_ANY());
+  mrb_define_method(mrb, java_support, "_exec_java_",  mrb_java_support_exec, MRB_ARGS_ANY());
+  mrb_define_method(mrb, java_support, "_system_java_",  mrb_java_support_system, MRB_ARGS_ANY());
 
 }

@@ -2,7 +2,7 @@ class JRubyOptsParser
 
   def self.parse!(opts)
     p = new(opts)
-    raise ArgumentError.new("Invalid CLI Options") unless p.valid?
+    # raise ArgumentError.new("Invalid CLI Options") unless p.valid?
     p
   end
 
@@ -55,12 +55,12 @@ class JRubyOptsParser
           @java_stack = java_opt
         elsif java_opt.empty?
           puts "(Prepend -J in front of these options when using 'jruby' command)"
-          JavaSupport.new.exec_java_proc(["-help"])
-          Kernel.exit
+          JavaSupport.system_java(["-help"])
+          return
         elsif java_opt.start_with?("-X")
           puts "(Prepend -J in front of these options when using 'jruby' command)"
-          JavaSupport.new.exec_java_proc(["-X"])
-          Kernel.exit
+          JavaSupport.system_java(["-X"])
+          return
         elsif java_opt.start_with?("-cp") || java_opt.start_with?("-classpath")
           @classpath << opts.shift
         elsif java_opt.start_with?("-ea")
