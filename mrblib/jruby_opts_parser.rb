@@ -84,9 +84,10 @@ class JRubyOptsParser
           @ruby_opts << opt
         end
       elsif ['-C', '-e', '-I', '-S'].include?(opt[0..1])
-        # Match switches that take an argument
-        opt += opts.shift if opt.size == 2
         @ruby_opts << opt
+        if opt.size == 2
+          @ruby_opts << opts.shift
+        end
       elsif opt == "--manage"
         @java_opts << "-Dcom.sun.management.jmxremote"
         @java_opts << "-Djruby.management.enabled=true"
