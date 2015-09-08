@@ -2,8 +2,6 @@ class JRubyOptsParser
 
   def self.parse!(opts)
     p = new(opts)
-    # raise ArgumentError.new("Invalid CLI Options") unless p.valid?
-    p
   end
 
   attr_reader :ruby_opts
@@ -110,7 +108,7 @@ class JRubyOptsParser
       elsif opt == "--sample"
         @java_opts << "-Xprof"
       elsif opt == "--1.8"
-       puts "warning: --1.8 ignored"
+        puts "warning: --1.8 ignored"
       elsif opt == "--1.9"
         puts "warning: --1.9 ignored"
       elsif opt == "--2.0"
