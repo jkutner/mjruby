@@ -30,5 +30,9 @@ def __main__(argv)
       "-Djruby.shell=#{JRubySupport::SYSTEM_SHELL}"]
 
   debug "java #{all_java_opts} #{java_class} #{cli_opts.ruby_opts}"
-  JavaSupport.exec_java(java_class, all_java_opts, cli_opts.ruby_opts)
+  if cli_opts.spawn?
+    JavaSupport.system_java(all_java_opts, java_class, cli_opts.ruby_opts)
+  else
+    JavaSupport.exec_java(java_class, all_java_opts, cli_opts.ruby_opts)
+  end
 end

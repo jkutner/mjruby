@@ -69,9 +69,9 @@ class JRubySupport
         jruby_already_added = true
       end
     end
-    # FIXME this doesn't work on windows. org/jruby/Main isn't found.
-    # cp_ary << File.join(jruby_home, "lib", "jruby-truffle.jar")
     raise "No JRuby JAR found in lib directory!" if cp_ary.empty?
+    # FIXME this doesn't work on windows. org/jruby/Main isn't found.
+    #cp_ary << File.join(jruby_home, "lib", "jruby-truffle.jar")
     cp_ary.join(JavaSupport.cp_delim)
   end
 

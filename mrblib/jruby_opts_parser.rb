@@ -26,6 +26,10 @@ class JRubyOptsParser
     @valid
   end
 
+  def spawn?
+    @spawn == true
+  end
+
   def java_mem
     @java_mem || '-Xmx500m'
   end
@@ -109,6 +113,8 @@ class JRubyOptsParser
         @java_opts << "-Djruby.compile.invokedynamic=false"
       elsif opt == "--sample"
         @java_opts << "-Xprof"
+      elsif opt == "--spawn"
+        @spawn = true
       elsif opt == "--1.8"
        puts "warning: --1.8 ignored"
       elsif opt == "--1.9"

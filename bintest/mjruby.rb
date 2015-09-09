@@ -23,6 +23,11 @@ assert('setup') do
       assert_true status.success?, "Process did not exit cleanly"
       assert_include output, "Hello World"
 
+      output, status = Open3.capture2(
+        "#{BIN_PATH} --spawn --dev -rwebrick -J-Dsome.prop=foobar -J-Xmx256m -e \"puts 'Hello World'\"")
+      assert_true status.success?, "Process did not exit cleanly"
+      assert_include output, "Hello World"
+
       output, error, status = Open3.capture3(
         "#{BIN_PATH} -rwebrick -e 'puts WEBrick::HTTPServer.new(:Port => 3000, :DocumentRoot => Dir.pwd)'")
       assert_true status.success?, "Process did not exit cleanly"
@@ -45,6 +50,11 @@ assert('setup') do
         "#{BIN_PATH} -J-ea -e \"puts 'Hello World'\"")
       assert_true status.success?, "Process did not exit cleanly"
       assert_include output, "Hello World"
+
+      output, status = Open3.capture2(
+        "#{BIN_PATH} -S gem install bundler")
+      assert_true status.success?, "Process did not exit cleanly"
+      assert_include output, "1 gem installed"
     end
   end
 end
