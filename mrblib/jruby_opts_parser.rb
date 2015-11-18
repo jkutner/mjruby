@@ -129,6 +129,9 @@ class JRubyOptsParser
         @ruby_opts << opt
       else
         # Abort processing on first non-opt arg
+        if JRubySupport.is_cygwin? and opt.start_with?("/")
+          opt = JRubySupport.cygpath(opt).strip
+        end
         @ruby_opts << opt
         @ruby_opts += opts
         opts.clear
