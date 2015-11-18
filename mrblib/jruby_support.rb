@@ -10,6 +10,14 @@ class JRubySupport
     @classpath = resolve_classpath
   end
 
+  def self.is_windows?
+    JRubySupport::IS_WINDOWS == "true"
+  end
+
+  def self.is_cygwin?
+    is_windows? and ENV['IS_CYGWIN'] != "false" and (ENV['IS_CYGWIN'] == "true" or ENV['SHELL'] == "/bin/bash")
+  end
+
   def java_opts(add_java_opts)
     add_java_opts.compact
     (ENV['JAVA_OPTS'] ? ENV['JAVA_OPTS'].split(" ") : []) + add_java_opts.compact
