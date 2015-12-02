@@ -1,4 +1,4 @@
-# mjruby
+# mjruby [![Build Status](https://travis-ci.org/jkutner/mjruby.svg?branch=master)](https://travis-ci.org/jkutner/mjruby)
 
 This is a rewrite of the JRuby launcher. It uses
 [mruby-cli](https://github.com/hone/mruby-cli) to
