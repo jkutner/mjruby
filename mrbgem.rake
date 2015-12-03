@@ -10,4 +10,6 @@ MRuby::Gem::Specification.new('mjruby') do |spec|
   spec.add_dependency 'mruby-string-ext', :core => 'mruby-string-ext'
   spec.add_dependency 'mruby-io', :mgem => 'mruby-io'
   spec.add_dependency 'mruby-jvm', :github => 'jkutner/mruby-jvm'
+
+  spec.cc.include_paths << "#{spec.build.gem_clone_dir}/mruby-io/include"
 end
