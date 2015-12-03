@@ -9,6 +9,13 @@ clean:
 install:
 EOF
 
+# If Windows doesn't have a `make` command this ext will fail.
+# But we don't really need to compile anything, do fake it.
+File.write('make.bat', <<EOF)
+@ECHO off
+ECHO Done
+EOF
+
 bindir = RbConfig::CONFIG['bindir']
 arch   = "#{ENV_JAVA['os.arch']}-#{ENV_JAVA['os.name']}"
 
