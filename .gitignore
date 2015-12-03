@@ -2,3 +2,4 @@ mruby/
 releases/
 .DS_Store
 target
+*.gem
