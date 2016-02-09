@@ -131,7 +131,7 @@ MRuby::CrossBuild.new('i686-pc-freebsd7') do |conf|
     cc.flags << "-ldl"
   end
 
-  conf.build_target     = 'x86_64-pc-linux-gnu'
+  conf.build_target     = 'i686-pc-linux-gnu'
   conf.host_target      = 'i686-pc-freebsd7'
 
   gem_config(conf)
