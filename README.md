@@ -8,12 +8,13 @@ This is very much in beta, and needs your help!
 
 ## Usage
 
-1. Download the precompiled `mjruby` binary for your System from the [releases page](https://github.com/jkutner/mjruby/releases).
-2. Put the binary in the `$JRUBY_HOME/bin` dir (alongside the `jruby` command).
-3. Run JRuby by using `mjruby` instead of `jruby`.
+1. Run `gem install mjruby`
+2. Run JRuby by using `mjruby` instead of `jruby`.
 
 Everything that works with the `jruby` command is supposed to work with
 the `mjruby` command. Please create an issue if you find a difference.
+
+If you really want to push it's limits, delete the `jruby` executable in your `JRUBY_HOME/bin` directory and rename the `mjruby` executable to `jruby`.
 
 ## Development
 
