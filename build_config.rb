@@ -107,32 +107,3 @@ MRuby::CrossBuild.new('i686-w64-mingw32') do |conf|
 
   gem_config(conf)
 end
-
-MRuby::CrossBuild.new('x86_64-pc-freebsd7') do |conf|
-  toolchain :gcc
-
-  [conf.cc, conf.cxx, conf.linker].each do |cc|
-    cc.flags << "-Wl,--no-as-needed"
-    cc.flags << "-ldl"
-  end
-
-  conf.build_target     = 'x86_64-pc-linux-gnu'
-  conf.host_target      = 'x86_64-pc-freebsd7'
-
-  gem_config(conf)
-end
-
-MRuby::CrossBuild.new('i686-pc-freebsd7') do |conf|
-  toolchain :gcc
-
-  [conf.cc, conf.cxx, conf.linker].each do |cc|
-    cc.flags << "-m32"
-    cc.flags << "-Wl,--no-as-needed"
-    cc.flags << "-ldl"
-  end
-
-  conf.build_target     = 'i686-pc-linux-gnu'
-  conf.host_target      = 'i686-pc-freebsd7'
-
-  gem_config(conf)
-end
