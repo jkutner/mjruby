@@ -30,4 +30,6 @@ binary =
   else nil
     raise "Could not find appropriate architecture for '#{arch}'"
   end
-FileUtils.cp(binary, bindir)
+
+bin_name = File.basename(binary).gsub('mjruby', 'jruby')
+FileUtils.cp(binary, File.join(bindir, bin_name))
